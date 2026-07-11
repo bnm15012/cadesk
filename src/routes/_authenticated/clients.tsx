@@ -159,10 +159,10 @@ function ClientsPage() {
   return (
     <AppShell>
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold">Clients</h1>
-          <p className="mt-1 text-indigo-100 text-sm">
+          <p className="mt-1 text-muted-foreground text-sm">
             {user?.isCaAdmin ? "All clients in your firm" : "Clients assigned to you"}
           </p>
         </div>

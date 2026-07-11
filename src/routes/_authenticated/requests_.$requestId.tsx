@@ -206,15 +206,15 @@ function RequestDetailPage() {
   return (
     <AppShell>
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-sm flex flex-wrap items-start justify-between gap-4">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold">{req.title}</h1>
-          <p className="mt-1 text-cyan-100 text-sm">
+          <p className="mt-1 text-muted-foreground text-sm">
             {req.clientName} · {req.fyLabel}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link to={backLink} className="inline-flex items-center text-sm text-cyan-100 hover:text-white">
+          <Link to={backLink} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
           <Badge variant="outline" className={

@@ -94,10 +94,10 @@ function RequestsPage() {
   return (
     <AppShell>
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold">Document Requests</h1>
-          <p className="mt-1 text-teal-100 text-sm">Track and manage document collection</p>
+          <p className="mt-1 text-muted-foreground text-sm">Track and manage document collection</p>
         </div>
         {canCreate && (
           <Dialog open={open} onOpenChange={setOpen}>

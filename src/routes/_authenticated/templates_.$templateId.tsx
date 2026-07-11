@@ -34,6 +34,10 @@ function TemplateEditorPage() {
   const canManage = hasPerm(user, "templates.manage");
   const [newItem, setNewItem] = useState("");
   const [newCategory, setNewCategory] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const fetchTemplate = useServerFn(getTemplate);
   const doAddItem = useServerFn(addTemplateItem);
@@ -48,6 +52,29 @@ function TemplateEditorPage() {
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["template", templateId] });
+
+  // Seed edit fields when template loads
+  useEffect(() => {
+    if (templateData?.template) {
+      setEditName(templateData.template.name);
+      setEditDesc(templateData.template.description ?? "");
+    }
+  }, [templateData?.template?.name, templateData?.template?.description]);
+
+  const handleSaveTemplate = async () => {
+    if (!editName.trim()) { toast.error("Name is required"); return; }
+    setSaving(true);
+    try {
+      await doUpdateTemplate({ data: { templateId, patch: { name: editName.trim(), description: editDesc.trim() || null } } });
+      invalidate();
+      setEditing(false);
+      toast.success("Template saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const addItem = async () => {
     const name = newItem.trim();
@@ -119,11 +146,11 @@ function TemplateEditorPage() {
   return (
     <AppShell>
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-sm">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h1 className="font-display text-2xl font-semibold truncate">{tpl.name}</h1>
-            {tpl.description && <p className="mt-1 text-amber-100 text-sm truncate">{tpl.description}</p>}
+            {tpl.description && <p className="mt-1 text-muted-foreground text-sm truncate">{tpl.description}</p>}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="sm" asChild>
@@ -140,24 +167,46 @@ function TemplateEditorPage() {
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-start gap-4">
-        <div className="flex-1 space-y-3">
-          <Input
-            defaultValue={tpl.name}
-            onBlur={(e) => e.target.value !== tpl.name && handleUpdateTemplate({ name: e.target.value })}
-            disabled={!canManage}
-            className="font-display text-xl font-semibold bg-white"
-            placeholder="Template name"
-          />
-          <Input
-            defaultValue={tpl.description ?? ""}
-            placeholder="Description"
-            onBlur={(e) => handleUpdateTemplate({ description: e.target.value || null })}
-            disabled={!canManage}
-            className="bg-white"
-          />
-        </div>
-      </div>
+      <Card className="mb-6 bg-white">
+        <CardContent className="pt-5">
+          {editing ? (
+            <div className="space-y-3">
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="font-display text-xl font-semibold"
+                placeholder="Template name *"
+                autoFocus
+              />
+              <Input
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                placeholder="Description (optional)"
+              />
+              <div className="flex gap-2">
+                <Button onClick={handleSaveTemplate} disabled={saving}>
+                  <Save className="mr-2 h-4 w-4" /> {saving ? "Saving…" : "Save"}
+                </Button>
+                <Button variant="outline" onClick={() => { setEditing(false); setEditName(tpl.name); setEditDesc(tpl.description ?? ""); }}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-display text-xl font-semibold">{tpl.name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{tpl.description || "No description"}</p>
+              </div>
+              {canManage && (
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="pt-6">

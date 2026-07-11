@@ -32,9 +32,9 @@ function ProfilePage() {
       <ChangePasswordModal open={changePassOpen} onOpenChange={setChangePassOpen} />
 
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm">
         <h1 className="font-display text-2xl font-semibold">Profile</h1>
-        <p className="mt-1 text-purple-100 text-sm">Your account details</p>
+        <p className="mt-1 text-muted-foreground text-sm">Your account details</p>
       </div>
 
       <div className="grid gap-6 max-w-xl">

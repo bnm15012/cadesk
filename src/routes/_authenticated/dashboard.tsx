@@ -48,14 +48,14 @@ function DashboardPage() {
   return (
     <AppShell>
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold">Dashboard</h1>
-          <p className="mt-1 text-blue-100 text-sm">Welcome back — here's your firm overview</p>
+          <p className="mt-1 text-muted-foreground text-sm">Welcome back — here's your firm overview</p>
         </div>
         {sub && (
           <Link to="/billing" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-blue-100" />
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
             <Badge variant={sub.status === "trial" ? "secondary" : "default"}>
               {sub.status === "trial"
                 ? `Free trial — ${trialDaysLeft} days left`

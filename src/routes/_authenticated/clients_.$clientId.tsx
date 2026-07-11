@@ -164,10 +164,10 @@ function ClientDetailPage() {
   return (
     <AppShell>
       {/* Page header banner */}
-      <div className="rounded-xl px-6 py-5 mb-6 bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-sm flex flex-wrap items-start justify-between gap-4">
+      <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold">{client.name}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-violet-100">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             {client.pan && <span>PAN: {client.pan}</span>}
             {client.gstin && <span>· GSTIN: {client.gstin}</span>}
             {client.mobile && <span>· {client.mobile}</span>}
