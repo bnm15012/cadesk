@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -248,28 +248,20 @@ function ClientsPage() {
               </TableRow>
             ) : (
               filtered.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell>
-                    <Link
-                      to="/clients/$clientId"
-                      params={{ clientId: String(c.id) }}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {c.name}
-                    </Link>
-                  </TableCell>
+                <TableRow
+                  key={c.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => navigate({ to: "/clients/$clientId", params: { clientId: String(c.id) } })}
+                >
+                  <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.pan ?? "—"}</TableCell>
                   <TableCell>{c.gstin ?? "—"}</TableCell>
                   <TableCell>{c.mobile ?? "—"}</TableCell>
                   <TableCell>
                     {c.portal_user_id ? (
-                      <Badge variant="secondary">Active</Badge>
+                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">Active</Badge>
                     ) : (
-                      <Link to="/clients/$clientId" params={{ clientId: String(c.id) }}>
-                        <Badge variant="outline" className="cursor-pointer hover:bg-accent">
-                          Set up login →
-                        </Badge>
-                      </Link>
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Not set up</Badge>
                     )}
                   </TableCell>
                   {(hasPerm(user, "clients.edit") || hasPerm(user, "clients.delete")) && (
@@ -279,8 +271,8 @@ function ClientsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            onClick={() => setEditTarget(c as ClientRow)}
+                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            onClick={(e) => { e.stopPropagation(); setEditTarget(c as ClientRow); }}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -289,8 +281,8 @@ function ClientsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => handleDelete(c as ClientRow)}
+                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={(e) => { e.stopPropagation(); handleDelete(c as ClientRow); }}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

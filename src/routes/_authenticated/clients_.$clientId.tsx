@@ -166,28 +166,33 @@ function ClientDetailPage() {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold">{client.name}</h1>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             {client.pan && <span>PAN: {client.pan}</span>}
             {client.gstin && <span>· GSTIN: {client.gstin}</span>}
             {client.mobile && <span>· {client.mobile}</span>}
             {client.email && <span>· {client.email}</span>}
+            {client.portal_user_id && (
+              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                Portal Active
+              </Badge>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" className="border-border" asChild>
             <Link to="/clients">
-              <ArrowLeft className="mr-2 h-4 w-4" /> All Clients
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Link>
           </Button>
           {hasPerm(user, "clients.edit") && (
-            <Button variant="outline" onClick={() => setEditOpen(true)}>
+            <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50" onClick={() => setEditOpen(true)}>
               <Pencil className="mr-2 h-4 w-4" /> Edit
             </Button>
           )}
           {!client.portal_user_id && hasPerm(user, "clients.edit") && (
             <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
                   <KeyRound className="mr-2 h-4 w-4" /> Create portal login
                 </Button>
               </DialogTrigger>
@@ -215,7 +220,7 @@ function ClientDetailPage() {
             </Dialog>
           )}
           {hasPerm(user, "clients.delete") && (
-            <Button variant="outline" className="text-destructive" onClick={handleDelete}>
+            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={handleDelete}>
               Delete
             </Button>
           )}
@@ -247,7 +252,18 @@ function ClientDetailPage() {
                           {format(new Date(r.created_at), "d MMM yyyy")}
                         </p>
                       </div>
-                      <Badge variant={r.status === "completed" ? "secondary" : "outline"}>
+                      <Badge
+                        variant="outline"
+                        className={
+                          r.status === "completed"
+                            ? "bg-green-100 text-green-700 border-green-200"
+                            : r.status === "open"
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : r.status === "archived"
+                            ? "bg-amber-100 text-amber-700 border-amber-200"
+                            : ""
+                        }
+                      >
                         {r.status}
                       </Badge>
                     </Link>

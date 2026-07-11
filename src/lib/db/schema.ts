@@ -81,7 +81,7 @@ export const tenantStatusEnum = mysqlEnum("tenant_status", [
 export const tenants = mysqlTable("tenants", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
-  status: tenantStatusEnum.notNull().default("active"),
+  status: mysqlEnum("tenant_status", ["active", "suspended"]).notNull().default("active"),
   created_at: datetime("created_at").notNull().default(new Date("1970-01-01")),
   updated_at: datetime("updated_at").notNull().default(new Date("1970-01-01")),
 });

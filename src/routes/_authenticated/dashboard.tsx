@@ -38,11 +38,11 @@ function DashboardPage() {
     : null;
 
   const cards = [
-    { label: "Total Clients", value: stats?.clientCount ?? "—", icon: Users, to: "/clients" },
-    { label: "Pending Uploads", value: stats?.pendingUploads ?? "—", icon: Clock, to: "/requests" },
-    { label: "Pending Reviews", value: stats?.pendingReviews ?? "—", icon: FolderOpen, to: "/requests" },
-    { label: "Approved Documents", value: stats?.approved ?? "—", icon: CheckCircle2, to: "/requests" },
-    { label: "Team Members", value: stats?.staffCount ?? "—", icon: UserCog, to: "/team" },
+    { label: "Total Clients", value: stats?.clientCount ?? "—", icon: Users, to: "/clients", iconClass: "text-blue-500", borderClass: "border-l-4 border-l-blue-400" },
+    { label: "Pending Uploads", value: stats?.pendingUploads ?? "—", icon: Clock, to: "/requests", iconClass: "text-amber-500", borderClass: "border-l-4 border-l-amber-400" },
+    { label: "Pending Reviews", value: stats?.pendingReviews ?? "—", icon: FolderOpen, to: "/requests", iconClass: "text-purple-500", borderClass: "border-l-4 border-l-purple-400" },
+    { label: "Approved Documents", value: stats?.approved ?? "—", icon: CheckCircle2, to: "/requests", iconClass: "text-green-500", borderClass: "border-l-4 border-l-green-400" },
+    { label: "Team Members", value: stats?.staffCount ?? "—", icon: UserCog, to: "/team", iconClass: "text-indigo-500", borderClass: "border-l-4 border-l-indigo-400" },
   ];
 
   return (
@@ -67,9 +67,9 @@ function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {cards.map((c) => (
           <Link key={c.label} to={c.to}>
-            <Card className="transition-shadow hover:shadow-md">
+            <Card className={`transition-shadow hover:shadow-md overflow-hidden ${c.borderClass}`}>
               <CardContent className="pt-6">
-                <c.icon className="mb-3 h-5 w-5 text-muted-foreground" />
+                <c.icon className={`mb-3 h-5 w-5 ${c.iconClass}`} />
                 <p className="font-display text-3xl font-semibold">{c.value}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{c.label}</p>
               </CardContent>

@@ -177,7 +177,22 @@ function RequestsPage() {
                   <TableCell>{r.clientName ?? "—"}</TableCell>
                   <TableCell>{r.fyLabel ?? "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{summary(r.request_items)}</TableCell>
-                  <TableCell><Badge variant={r.status === "completed" ? "default" : r.status === "archived" ? "outline" : "secondary"}>{r.status}</Badge></TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        r.status === "completed"
+                          ? "bg-green-100 text-green-700 border-green-200"
+                          : r.status === "open"
+                          ? "bg-blue-100 text-blue-700 border-blue-200"
+                          : r.status === "archived"
+                          ? "bg-amber-100 text-amber-700 border-amber-200"
+                          : ""
+                      }
+                    >
+                      {r.status}
+                    </Badge>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

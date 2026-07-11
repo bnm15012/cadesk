@@ -217,7 +217,12 @@ function RequestDetailPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={req.status === "completed" ? "default" : req.status === "archived" ? "outline" : "secondary"}>{req.status}</Badge>
+          <Badge variant="outline" className={
+            req.status === "completed" ? "bg-green-50 text-green-700 border-green-200" :
+            req.status === "open"      ? "bg-blue-50 text-blue-700 border-blue-200" :
+            req.status === "archived"  ? "bg-gray-100 text-gray-600 border-gray-200" :
+            "bg-amber-50 text-amber-700 border-amber-200"
+          }>{req.status}</Badge>
           {canReview && req.status === "open" && (
             <Button size="sm" onClick={markCompleted}><CheckCircle2 className="mr-2 h-4 w-4" /> Mark completed</Button>
           )}
