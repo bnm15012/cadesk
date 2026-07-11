@@ -22,11 +22,18 @@ function getMysqlConfig() {
 }
 
 // Singleton pool — reused across requests in the same process.
-let _pool: mysql.Pool | undefined;
+// In dev, hot-reload creates a new module instance; we stash the pool on
+// globalThis so it survives reloads and we never leak connections.
+declare global {
+  // eslint-disable-next-line no-var
+  var __mysqlPool: mysql.Pool | undefined;
+  // eslint-disable-next-line no-var
+  var __drizzleDb: Db | undefined;
+}
 
 function getPool(): mysql.Pool {
-  if (!_pool) {
-    _pool = mysql.createPool({
+  if (!globalThis.__mysqlPool) {
+    globalThis.__mysqlPool = mysql.createPool({
       ...getMysqlConfig(),
       waitForConnections: true,
       connectionLimit: 10,
@@ -34,17 +41,14 @@ function getPool(): mysql.Pool {
       timezone: "+00:00", // store/read as UTC
     });
   }
-  return _pool;
+  return globalThis.__mysqlPool;
 }
 
-// Lazy singleton Drizzle client — only created when first accessed server-side.
-let _db: Db | undefined;
-
 export function getDb(): Db {
-  if (!_db) {
-    _db = drizzle(getPool(), { schema, mode: "default" }) as Db;
+  if (!globalThis.__drizzleDb) {
+    globalThis.__drizzleDb = drizzle(getPool(), { schema, mode: "default" }) as Db;
   }
-  return _db;
+  return globalThis.__drizzleDb;
 }
 
 export * from "./schema";

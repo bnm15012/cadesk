@@ -14,6 +14,7 @@ import {
   insertDocumentFile,
   deleteDocumentFile,
   markRequestCompleted,
+  reopenRequest,
   addComment,
 } from "@/lib/request-detail.functions";
 import { AppShell } from "@/components/layout/AppShell";
@@ -21,8 +22,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { StatusBadge, DOC_STATUS_LABELS, type DocStatus } from "@/components/StatusBadge";
-import { ArrowLeft, Upload, Download, Trash2, MessageSquare, Plus, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Upload, Download, Trash2, MessageSquare, Plus, CheckCircle2, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/requests_/$requestId")({
@@ -51,6 +57,7 @@ function RequestDetailPage() {
   const doInsertFile = useServerFn(insertDocumentFile);
   const doDeleteFile = useServerFn(deleteDocumentFile);
   const doMarkCompleted = useServerFn(markRequestCompleted);
+  const doReopenRequest = useServerFn(reopenRequest);
   const doAddComment = useServerFn(addComment);
   const fetchUploadUrl = useServerFn(getUploadUrl);
   const fetchDownloadUrl = useServerFn(getDownloadUrl);
@@ -195,6 +202,16 @@ function RequestDetailPage() {
     }
   };
 
+  const handleReopen = async () => {
+    try {
+      await doReopenRequest({ data: { requestId } });
+      invalidate();
+      toast.success("Request reopened");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reopen request");
+    }
+  };
+
   if (isLoading) return <AppShell><p className="text-muted-foreground">Loading…</p></AppShell>;
   if (!data?.request) return <AppShell><p>Request not found.</p></AppShell>;
 
@@ -223,7 +240,46 @@ function RequestDetailPage() {
             "bg-amber-50 text-amber-700 border-amber-200"
           }>{req.status}</Badge>
           {canReview && req.status === "open" && (
-            <Button size="sm" variant="secondary" onClick={markCompleted}><CheckCircle2 className="mr-2 h-4 w-4" /> Mark completed</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="secondary">
+                  <CheckCircle2 className="mr-2 h-4 w-4" /> Mark completed
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Mark as completed?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will mark <strong>{req.title}</strong> as completed. You can reopen it later if needed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={markCompleted}>Mark completed</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {canReview && req.status === "completed" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <RotateCcw className="mr-2 h-4 w-4" /> Reopen
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reopen this request?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will move <strong>{req.title}</strong> back to <strong>open</strong> so documents can be reviewed again.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReopen}>Reopen</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </div>

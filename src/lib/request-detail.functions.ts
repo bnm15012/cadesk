@@ -360,6 +360,39 @@ export const markRequestCompleted = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const reopenRequest = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((input: unknown) => z.object({ requestId: z.number().int().positive() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const tenantId = await getUserTenant(userId);
+    if (!tenantId) throw new Error("No firm found for your account");
+
+    const db = getDb();
+    const now = new Date();
+
+    await db
+      .update(document_requests)
+      .set({ status: "open", updated_at: now })
+      .where(
+        and(
+          eq(document_requests.id, data.requestId),
+          eq(document_requests.tenant_id, tenantId)
+        )
+      );
+
+    await db.insert(activity_logs).values({
+      tenant_id: tenantId,
+      user_id: userId,
+      action: "Reopened request",
+      entity_type: "request",
+      entity_id: String(data.requestId),
+      created_at: now,
+    });
+
+    return { ok: true };
+  });
+
 const addCommentSchema = z.object({
   requestItemId: z.number().int().positive(),
   body: z.string().trim().min(1),
