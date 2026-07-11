@@ -201,7 +201,6 @@ function DashboardPage() {
         {/* Recent Activity */}
         {(() => {
           const rows = stats?.activity ?? [];
-          const visible = rows.slice(0, 10);
           return (
             <div className="rounded-lg border border-border bg-white overflow-hidden flex flex-col">
               <div className="flex items-center gap-2 border-b border-border bg-slate-50 px-4 py-3">
@@ -210,7 +209,7 @@ function DashboardPage() {
               {rows.length ? (
                 <>
                   <ul className="flex-1">
-                    {visible.map((a, i) => (
+                    {rows.map((a, i) => (
                       <li key={a.id} className={`flex items-center justify-between gap-3 px-4 py-2.5 ${i !== 0 ? "border-t border-border" : ""}`}>
                         <span className="text-sm truncate">{a.action}</span>
                         <span className="shrink-0 text-xs text-muted-foreground">{format(new Date(a.created_at), "d MMM, h:mm a")}</span>
