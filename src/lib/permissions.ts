@@ -42,11 +42,10 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    group: "Templates & Settings",
+    group: "Templates & Years",
     permissions: [
       { key: "templates.manage", label: "Manage document templates" },
-      { key: "settings.view", label: "View firm settings" },
-      { key: "settings.edit", label: "Edit firm settings, roles & financial years" },
+      { key: "financial_years.manage", label: "Manage financial years" },
     ],
   },
 ];
