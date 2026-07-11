@@ -2,9 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
 import { logActivity } from "@/lib/activity";
+import { getUploadUrl, getDownloadUrl, deleteStorageFile } from "@/lib/storage";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +76,10 @@ function RequestDetailPage() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["request", requestId] });
 
+  const fetchUploadUrl = useServerFn(getUploadUrl);
+  const fetchDownloadUrl = useServerFn(getDownloadUrl);
+  const removeStorageFile = useServerFn(deleteStorageFile);
+
   const addItem = async () => {
     if (!user?.tenantId || !newItemName.trim()) return;
     const nextSort = (data?.items.at(-1)?.sort_order ?? -1) + 1;
@@ -91,41 +97,77 @@ function RequestDetailPage() {
     invalidate();
   };
 
-  const uploadFile = async (item: { id: string }, file: File) => {
+  const uploadFile = async (item: { id: string; name: string }, file: File) => {
     if (!user?.tenantId) return;
-    const path = `${user.tenantId}/${requestId}/${item.id}/${Date.now()}_${file.name.replace(/[^\w.\-]/g, "_")}`;
-    const { error: upErr } = await supabase.storage.from("documents").upload(path, file, { upsert: false });
-    if (upErr) return void toast.error(upErr.message);
-    const { error: insErr } = await supabase.from("document_files").insert({
-      request_item_id: item.id,
-      tenant_id: user.tenantId,
-      storage_path: path,
-      file_name: file.name,
-      file_size: file.size,
-      mime_type: file.type || null,
-      uploaded_by: user.userId,
-    });
-    if (insErr) return void toast.error(insErr.message);
-    await supabase.from("request_items").update({ status: "uploaded" as const }).eq("id", item.id);
-    logActivity({ tenantId: user.tenantId, userId: user.userId, action: `Uploaded ${file.name}`, entityType: "request_item", entityId: item.id });
-    toast.success("File uploaded");
-    invalidate();
+
+    // Path: {clientName}/{financialYear}/{documentName}/{timestamp}_{filename}
+    // e.g. "Sharma_and_Associates/FY_2024-25/PAN_Card/1720000000000_pan.pdf"
+    const slug = (s: string) => s.trim().replace(/[^\w\-]/g, "_").replace(/_+/g, "_");
+    const reqData    = data?.request;
+    const clientName = slug((reqData?.clients as { name: string } | null)?.name ?? `client_${reqData?.client_id ?? requestId}`);
+    const fyLabel    = slug((reqData?.financial_years as { label: string } | null)?.label ?? "unknown_fy");
+    const docName    = slug(item.name);
+    const fileName   = file.name.replace(/[^\w.\-]/g, "_");
+    const storagePath = `${clientName}/${fyLabel}/${docName}/${Date.now()}_${fileName}`;
+
+    toast.loading("Uploading…", { id: "upload" });
+    try {
+      // 1. Get presigned upload URL from server (R2)
+      const { url } = await fetchUploadUrl({
+        data: { storagePath, contentType: file.type || "application/octet-stream", contentLength: file.size },
+      });
+
+      // 2. Upload directly from browser to R2
+      const uploadRes = await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+      });
+      if (!uploadRes.ok) throw new Error("Upload to storage failed");
+
+      // 3. Save metadata to MySQL via Supabase PostgREST
+      const { error: insErr } = await supabase.from("document_files").insert({
+        request_item_id: item.id,
+        tenant_id: user.tenantId,
+        storage_path: storagePath,
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type || null,
+        uploaded_by: user.userId,
+      });
+      if (insErr) throw new Error(insErr.message);
+
+      // 4. Update item status
+      await supabase.from("request_items").update({ status: "uploaded" as const }).eq("id", item.id);
+      logActivity({ tenantId: user.tenantId, userId: user.userId, action: `Uploaded ${file.name}`, entityType: "request_item", entityId: item.id });
+      toast.success("File uploaded", { id: "upload" });
+      invalidate();
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed", { id: "upload" });
+    }
   };
 
   const downloadFile = async (path: string, name: string) => {
-    const { data, error } = await supabase.storage.from("documents").createSignedUrl(path, 300);
-    if (error || !data) return void toast.error(error?.message ?? "Failed");
-    const a = document.createElement("a");
-    a.href = data.signedUrl;
-    a.download = name;
-    a.click();
+    try {
+      const { url } = await fetchDownloadUrl({ data: { storagePath: path, fileName: name } });
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+    } catch (err: any) {
+      toast.error(err.message ?? "Download failed");
+    }
   };
 
   const deleteFile = async (fileId: string, path: string) => {
     if (!confirm("Delete this file?")) return;
-    await supabase.storage.from("documents").remove([path]);
-    await supabase.from("document_files").delete().eq("id", fileId);
-    invalidate();
+    try {
+      await removeStorageFile({ data: { storagePath: path } });
+      await supabase.from("document_files").delete().eq("id", fileId);
+      invalidate();
+    } catch (err: any) {
+      toast.error(err.message ?? "Delete failed");
+    }
   };
 
   const updateStatus = async (itemId: string, status: DocStatus) => {
