@@ -20,7 +20,7 @@ import {
 import { Plus, FileStack, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/templates")({
-  head: () => ({ meta: [{ title: "Templates — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Templates — CADesk" }] }),
   component: TemplatesPage,
 });
 

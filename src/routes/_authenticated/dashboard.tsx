@@ -10,7 +10,7 @@ import { Users, FolderOpen, CheckCircle2, Clock, UserCog, CreditCard } from "luc
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — CADesk" }] }),
   component: DashboardPage,
 });
 

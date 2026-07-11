@@ -16,7 +16,7 @@ import { ArrowLeft, Upload, Download, Trash2, MessageSquare, Plus, CheckCircle2 
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/requests_/$requestId")({
-  head: () => ({ meta: [{ title: "Request — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Request — CADesk" }] }),
   component: RequestDetailPage,
 });
 

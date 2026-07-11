@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/templates_/$templateId")({
-  head: () => ({ meta: [{ title: "Template — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Template — CADesk" }] }),
   component: TemplateEditorPage,
 });
 

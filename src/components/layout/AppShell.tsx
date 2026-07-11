@@ -11,18 +11,20 @@ import {
   ShieldCheck,
   History,
   CreditCard,
-  Landmark,
+  FolderCheck,
   LogOut,
   Menu,
   MoreHorizontal,
   X,
   FileText,
+  KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 
 interface NavItem {
   to: string;
@@ -37,6 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [changePassOpen, setChangePassOpen] = useState(false);
 
   const handleSignOut = async () => {
     await queryClient.cancelQueries();
@@ -103,10 +106,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const sidebarHeader = (
     <div className="flex items-center gap-2 px-6 py-5">
       <span className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-        <Landmark className="h-4 w-4" />
+        <FolderCheck className="h-4 w-4" />
       </span>
       <span className="font-display text-lg font-semibold text-sidebar-accent-foreground">
-        PracticeVault
+        CADesk
       </span>
     </div>
   );
@@ -127,6 +130,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Button
         variant="ghost"
         size="sm"
+        onClick={() => setChangePassOpen(true)}
+        className="w-full justify-start text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      >
+        <KeyRound className="mr-2 h-4 w-4" /> Change password
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={handleSignOut}
         className="w-full justify-start text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
@@ -137,6 +148,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <ChangePasswordModal open={changePassOpen} onOpenChange={setChangePassOpen} />
+
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-sidebar lg:flex">
         {sidebarHeader}
@@ -148,10 +161,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="fixed inset-x-0 top-0 z-30 flex items-center justify-between bg-sidebar px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-            <Landmark className="h-4 w-4" />
+            <FolderCheck className="h-4 w-4" />
           </span>
           <span className="font-display text-base font-semibold text-sidebar-accent-foreground">
-            PracticeVault
+            CADesk
           </span>
         </div>
         <Button

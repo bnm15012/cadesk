@@ -20,7 +20,7 @@ import {
 import { Plus, CalendarRange } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/financial-years")({
-  head: () => ({ meta: [{ title: "Financial Years — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Financial Years — CADesk" }] }),
   component: FinancialYearsPage,
 });
 

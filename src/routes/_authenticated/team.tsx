@@ -36,7 +36,7 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/team")({
-  head: () => ({ meta: [{ title: "Team — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Team — CADesk" }] }),
   component: TeamPage,
 });
 

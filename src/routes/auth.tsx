@@ -14,7 +14,7 @@ import { getUserRoles } from "@/lib/auth.functions";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — PracticeVault" },
+      { title: "Sign in — CADesk" },
       { name: "description", content: "Sign in to your CA firm workspace or register a new firm." },
     ],
   }),

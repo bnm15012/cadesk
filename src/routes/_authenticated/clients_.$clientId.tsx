@@ -25,7 +25,7 @@ import { ArrowLeft, KeyRound, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/clients_/$clientId")({
-  head: () => ({ meta: [{ title: "Client — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Client — CADesk" }] }),
   component: ClientDetailPage,
 });
 

@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PracticeVault — Client Document Collection for CA Firms" },
+      { title: "CADesk — Client Document Collection for CA Firms" },
       {
         name: "description",
         content:
           "Collect, review and approve client documents by financial year. Multi-tenant practice management built for Chartered Accountant firms in India.",
       },
-      { name: "author", content: "PracticeVault" },
-      { property: "og:title", content: "PracticeVault — Client Document Collection for CA Firms" },
+      { name: "author", content: "CADesk" },
+      { property: "og:title", content: "CADesk — Client Document Collection for CA Firms" },
       {
         property: "og:description",
         content:
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "PracticeVault — Client Document Collection for CA Firms" },
+      { name: "twitter:title", content: "CADesk — Client Document Collection for CA Firms" },
       { name: "twitter:description", content: "Collect, review and approve client documents by financial year. Multi-tenant practice management built for Chartered Accountant firms in India." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44056972-633d-4043-b239-68c6bea735c6/id-preview-3d4354c9--86bba532-2aae-4b7d-abfd-ff8861e34bbf.lovable.app-1783774278418.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44056972-633d-4043-b239-68c6bea735c6/id-preview-3d4354c9--86bba532-2aae-4b7d-abfd-ff8861e34bbf.lovable.app-1783774278418.png" },

@@ -5,10 +5,8 @@ import { useState, useEffect } from "react";
 import { getPublicPlans } from "@/lib/billing.functions";
 import { AuthModal } from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Landmark,
   FolderCheck,
   Users,
   ShieldCheck,
@@ -28,7 +26,7 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "PracticeVault — Client Document Collection for CA Firms" },
+      { title: "CADesk — Client Document Collection for CA Firms" },
       {
         name: "description",
         content:
@@ -132,9 +130,9 @@ function DashboardIllustration() {
           <div className="hidden w-44 flex-col gap-1 border-r border-white/10 bg-white/5 p-3 sm:flex">
             <div className="mb-2 flex items-center gap-2 px-2 py-1">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-amber-400">
-                <Landmark className="h-3.5 w-3.5 text-white" />
+                <FolderCheck className="h-3.5 w-3.5 text-white" />
               </span>
-              <span className="text-xs font-semibold text-white">PracticeVault</span>
+              <span className="text-xs font-semibold text-white">CADesk</span>
             </div>
             {["Dashboard", "Clients", "Requests", "Templates", "Team", "Billing"].map((item, i) => (
               <div
@@ -219,9 +217,9 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:px-8">
           <div className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400">
-              <Landmark className="h-5 w-5 text-slate-900" />
+              <FolderCheck className="h-5 w-5 text-slate-900" />
             </span>
-            <span className="font-display text-xl font-semibold text-white">PracticeVault</span>
+            <span className="font-display text-xl font-semibold text-white">CADesk</span>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10" onClick={openLogin}>
@@ -266,7 +264,7 @@ function Landing() {
                 <span className="text-amber-400"> clients</span> for<br className="hidden sm:block" /> documents.
               </h1>
               <p className="mt-5 max-w-lg text-lg text-blue-100/70">
-                PracticeVault gives your firm a secure portal where clients upload exactly what you
+                CADesk gives your firm a secure portal where clients upload exactly what you
                 need — organized by financial year, reviewed by your team, tracked to the last version.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -307,24 +305,24 @@ function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
-      <section className="bg-slate-50">
+      <section className="bg-slate-900">
         <div className="mx-auto max-w-6xl px-4 py-16 lg:px-8">
           <div className="text-center">
-            <Badge variant="secondary" className="mb-3">How it works</Badge>
-            <h2 className="font-display text-3xl font-semibold text-slate-900">Three steps to a paperless practice</h2>
-            <p className="mt-3 text-muted-foreground">Simple enough to set up today, powerful enough to run your entire firm.</p>
+            <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-400 mb-3">How it works</span>
+            <h2 className="font-display text-3xl font-semibold text-white">Three steps to a paperless practice</h2>
+            <p className="mt-3 text-slate-400">Simple enough to set up today, powerful enough to run your entire firm.</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {HOW_IT_WORKS.map((item) => (
-              <div key={item.step} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div className="absolute right-5 top-4 font-display text-7xl font-bold text-slate-100 select-none">
+              <div key={item.step} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8">
+                <div className="absolute right-5 top-4 font-display text-7xl font-bold text-white/5 select-none">
                   {item.step}
                 </div>
                 <span className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${item.bg}`}>
                   <item.icon className="h-6 w-6 text-white" />
                 </span>
-                <h3 className="font-display text-xl font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-500">{item.text}</p>
+                <h3 className="font-display text-xl font-semibold text-white">{item.title}</h3>
+                <p className="mt-2 text-sm text-slate-400">{item.text}</p>
               </div>
             ))}
           </div>
@@ -332,24 +330,24 @@ function Landing() {
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <section className="bg-white">
+      <section className="bg-slate-950">
         <div className="mx-auto max-w-6xl px-4 py-16 lg:px-8">
           <div className="text-center">
-            <Badge variant="secondary" className="mb-3">Features</Badge>
-            <h2 className="font-display text-3xl font-semibold">Everything a modern practice needs</h2>
-            <p className="mt-3 text-muted-foreground">Purpose-built for CA firms — not a generic tool adapted to fit.</p>
+            <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-400 mb-3">Features</span>
+            <h2 className="font-display text-3xl font-semibold text-white">Everything a modern practice needs</h2>
+            <p className="mt-3 text-slate-400">Purpose-built for CA firms — not a generic tool adapted to fit.</p>
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className={`group rounded-2xl border ${f.border} bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md`}
+                className="group rounded-2xl border border-white/10 bg-white/5 p-6 transition-all hover:-translate-y-1 hover:bg-white/10"
               >
                 <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${f.color}`}>
                   <f.icon className="h-6 w-6" />
                 </span>
-                <h3 className="font-display text-lg font-semibold">{f.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{f.text}</p>
+                <h3 className="font-display text-lg font-semibold text-white">{f.title}</h3>
+                <p className="mt-2 text-sm text-slate-400">{f.text}</p>
               </div>
             ))}
           </div>
@@ -357,25 +355,21 @@ function Landing() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────── */}
-      <section
-        style={{
-          background: "linear-gradient(160deg, #f0f9ff 0%, #fefce8 50%, #f0fdf4 100%)",
-        }}
-      >
+      <section className="bg-slate-900">
         <div className="mx-auto max-w-6xl px-4 py-16 lg:px-8">
           <div className="text-center">
-            <Badge variant="secondary" className="mb-3">Pricing</Badge>
-            <h2 className="font-display text-3xl font-semibold">Simple, honest pricing</h2>
-            <p className="mt-3 text-muted-foreground">Every plan starts with a 7-day free trial. No credit card required.</p>
+            <span className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-400 mb-3">Pricing</span>
+            <h2 className="font-display text-3xl font-semibold text-white">Simple, honest pricing</h2>
+            <p className="mt-3 text-slate-400">Every plan starts with a 7-day free trial. No credit card required.</p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {(plans ?? []).map((plan, i) => (
-              <Card
+              <div
                 key={plan.id}
-                className={`relative flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl ${
+                className={`relative flex flex-col rounded-2xl border p-6 transition-all hover:-translate-y-1 ${
                   i === 1
-                    ? "border-2 border-amber-400 shadow-lg shadow-amber-100"
-                    : "border border-border"
+                    ? "border-amber-400 bg-amber-400/5 shadow-lg shadow-amber-900/20"
+                    : "border-white/10 bg-white/5"
                 }`}
               >
                 {i === 1 && (
@@ -385,56 +379,54 @@ function Landing() {
                     </span>
                   </div>
                 )}
-                <CardHeader className={`rounded-t-xl pb-3 ${i === 0 ? "bg-blue-50" : i === 1 ? "bg-amber-50" : "bg-emerald-50"}`}>
-                  <CardTitle className="font-display text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col pt-5">
-                  <div className="mb-5">
-                    <p className="font-display text-4xl font-semibold">
-                      {formatINR(plan.price_monthly)}
-                      <span className="text-base font-normal text-muted-foreground"> /month</span>
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      or {formatINR(plan.price_yearly)}/year · save ~17%
-                    </p>
-                  </div>
-                  <ul className="flex-1 space-y-2.5 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-500" /> Up to {plan.max_clients} clients
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-500" /> {plan.max_staff} team members
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-500" /> {plan.storage_gb} GB secure storage
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-500" />{" "}
-                      {plan.max_templates >= 999 ? "Unlimited" : plan.max_templates} templates
-                    </li>
-                    {Object.entries(plan.features ?? {}).map(([k, v]) =>
-                      v ? (
-                        <li key={k} className="flex items-center gap-2 capitalize">
-                          <Check className="h-4 w-4 shrink-0 text-emerald-500" />{" "}
-                          {k.replaceAll("_", " ")}
-                        </li>
-                      ) : null,
-                    )}
-                  </ul>
-                  <Button
-                    className={`mt-6 w-full font-semibold ${
-                      i === 1
-                        ? "bg-amber-400 text-slate-900 hover:bg-amber-300"
-                        : ""
-                    }`}
-                    variant={i === 1 ? "default" : "outline"}
-                    onClick={openSignup}
-                  >
-                    Start free trial
-                  </Button>
-                </CardContent>
-              </Card>
+                <div className={`mb-4 rounded-xl px-3 py-2 ${i === 0 ? "bg-blue-500/10" : i === 1 ? "bg-amber-400/10" : "bg-emerald-500/10"}`}>
+                  <p className={`font-display text-lg font-semibold ${i === 0 ? "text-blue-300" : i === 1 ? "text-amber-300" : "text-emerald-300"}`}>{plan.name}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{plan.description}</p>
+                </div>
+                <div className="mb-5">
+                  <p className="font-display text-4xl font-semibold text-white">
+                    {formatINR(plan.price_monthly)}
+                    <span className="text-base font-normal text-slate-400"> /month</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    or {formatINR(plan.price_yearly)}/year · save ~17%
+                  </p>
+                </div>
+                <ul className="flex-1 space-y-2.5 text-sm">
+                  <li className="flex items-center gap-2 text-slate-300">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-400" /> Up to {plan.max_clients} clients
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-300">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-400" /> {plan.max_staff} team members
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-300">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-400" /> {plan.storage_gb} GB secure storage
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-300">
+                    <Check className="h-4 w-4 shrink-0 text-emerald-400" />{" "}
+                    {plan.max_templates >= 999 ? "Unlimited" : plan.max_templates} templates
+                  </li>
+                  {Object.entries(plan.features ?? {}).map(([k, v]) =>
+                    v ? (
+                      <li key={k} className="flex items-center gap-2 capitalize text-slate-300">
+                        <Check className="h-4 w-4 shrink-0 text-emerald-400" />{" "}
+                        {k.replaceAll("_", " ")}
+                      </li>
+                    ) : null,
+                  )}
+                </ul>
+                <Button
+                  className={`mt-6 w-full font-semibold ${
+                    i === 1
+                      ? "bg-amber-400 text-slate-900 hover:bg-amber-300"
+                      : "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                  variant="outline"
+                  onClick={openSignup}
+                >
+                  Start free trial
+                </Button>
+              </div>
             ))}
           </div>
         </div>
@@ -469,7 +461,7 @@ function Landing() {
 
       {/* ── FOOTER ───────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-slate-900 py-8 text-center text-sm text-white/40">
-        © {new Date().getFullYear()} PracticeVault. Secure document collection for CA firms.
+        © {new Date().getFullYear()} CADesk. Secure document collection for CA firms.
       </footer>
     </div>
   );

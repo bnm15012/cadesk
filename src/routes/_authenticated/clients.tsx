@@ -29,7 +29,7 @@ import {
 import { Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/clients")({
-  head: () => ({ meta: [{ title: "Clients — PracticeVault" }] }),
+  head: () => ({ meta: [{ title: "Clients — CADesk" }] }),
   component: ClientsPage,
 });
 
