@@ -250,11 +250,17 @@ export function AuthModal({ open, onOpenChange, defaultTab = "login" }: AuthModa
     });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     setLoading(true);
+    const skipConfirmation = import.meta.env.VITE_SKIP_EMAIL_CONFIRMATION === "true";
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth`,
+        // Local dev (VITE_SKIP_EMAIL_CONFIRMATION=true): no redirect, Supabase
+        // confirms immediately (requires "Confirm email" OFF in Supabase dashboard).
+        // Production: send real confirmation email that redirects back to the app.
+        emailRedirectTo: skipConfirmation
+          ? undefined
+          : `${import.meta.env.VITE_APP_URL ?? window.location.origin}/auth`,
         data: { full_name: parsed.data.fullName, firm_name: parsed.data.firmName },
       },
     });
