@@ -61,7 +61,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
           .from(activity_logs)
           .where(eq(activity_logs.tenant_id, tenantId))
           .orderBy(desc(activity_logs.created_at))
-          .limit(8),
+          .limit(10),
         // Pending uploads per client
         db
           .select({

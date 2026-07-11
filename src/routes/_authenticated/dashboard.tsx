@@ -83,89 +83,156 @@ function DashboardPage() {
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
 
         {/* Pending Uploads by Client */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="font-display text-base flex items-center gap-2">
-              <Upload className="h-4 w-4 text-amber-500" /> Pending Uploads
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {stats?.pendingUploadsByClient?.length ? (
-              <ul className="divide-y divide-border">
-                {stats.pendingUploadsByClient.map((c) => (
-                  <li key={c.clientId}>
-                    <Link
-                      to="/clients/$clientId"
-                      params={{ clientId: String(c.clientId) }}
-                      className="flex items-center justify-between py-2.5 text-sm hover:text-primary"
-                    >
-                      <span className="truncate">{c.clientName}</span>
-                      <Badge variant="outline" className="ml-2 shrink-0 bg-amber-50 text-amber-700 border-amber-200">
-                        {c.count} doc{c.count !== 1 ? "s" : ""}
-                      </Badge>
+        {(() => {
+          const rows = stats?.pendingUploadsByClient ?? [];
+          const visible = rows.slice(0, 5);
+          const extra = rows.length - visible.length;
+          return (
+            <div className="rounded-lg border border-border bg-white overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 border-b border-border bg-amber-50 px-4 py-3">
+                <Upload className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-semibold text-amber-800">Pending Uploads</span>
+                {rows.length > 0 && (
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
+                    {rows.length}
+                  </span>
+                )}
+              </div>
+              {rows.length ? (
+                <>
+                  <ul className="flex-1">
+                    {visible.map((c, i) => (
+                      <li key={c.clientId} className={i !== 0 ? "border-t border-border" : ""}>
+                        <Link
+                          to="/clients/$clientId"
+                          params={{ clientId: String(c.clientId) }}
+                          className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-700">
+                              {c.clientName[0].toUpperCase()}
+                            </span>
+                            <span className="text-sm font-medium truncate">{c.clientName}</span>
+                          </div>
+                          <Badge variant="outline" className="ml-3 shrink-0 bg-amber-50 text-amber-700 border-amber-200 text-xs">
+                            {c.count} doc{c.count !== 1 ? "s" : ""}
+                          </Badge>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-t border-border px-4 py-2.5 flex items-center justify-between">
+                    {extra > 0 ? (
+                      <span className="text-xs text-muted-foreground">+{extra} more client{extra !== 1 ? "s" : ""}</span>
+                    ) : <span />}
+                    <Link to="/requests" className="text-xs text-primary font-medium hover:underline">
+                      View all requests →
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="py-4 text-sm text-muted-foreground">No pending uploads.</p>
-            )}
-          </CardContent>
-        </Card>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-400 mb-2" />
+                  <p className="text-sm text-muted-foreground">All caught up!</p>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Pending Reviews by Client */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="font-display text-base flex items-center gap-2">
-              <FileSearch className="h-4 w-4 text-purple-500" /> Pending Reviews
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {stats?.pendingReviewsByClient?.length ? (
-              <ul className="divide-y divide-border">
-                {stats.pendingReviewsByClient.map((c) => (
-                  <li key={c.clientId}>
-                    <Link
-                      to="/clients/$clientId"
-                      params={{ clientId: String(c.clientId) }}
-                      className="flex items-center justify-between py-2.5 text-sm hover:text-primary"
-                    >
-                      <span className="truncate">{c.clientName}</span>
-                      <Badge variant="outline" className="ml-2 shrink-0 bg-purple-50 text-purple-700 border-purple-200">
-                        {c.count} doc{c.count !== 1 ? "s" : ""}
-                      </Badge>
+        {(() => {
+          const rows = stats?.pendingReviewsByClient ?? [];
+          const visible = rows.slice(0, 5);
+          const extra = rows.length - visible.length;
+          return (
+            <div className="rounded-lg border border-border bg-white overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 border-b border-border bg-purple-50 px-4 py-3">
+                <FileSearch className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-semibold text-purple-800">Pending Reviews</span>
+                {rows.length > 0 && (
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white">
+                    {rows.length}
+                  </span>
+                )}
+              </div>
+              {rows.length ? (
+                <>
+                  <ul className="flex-1">
+                    {visible.map((c, i) => (
+                      <li key={c.clientId} className={i !== 0 ? "border-t border-border" : ""}>
+                        <Link
+                          to="/clients/$clientId"
+                          params={{ clientId: String(c.clientId) }}
+                          className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-100 text-xs font-semibold text-purple-700">
+                              {c.clientName[0].toUpperCase()}
+                            </span>
+                            <span className="text-sm font-medium truncate">{c.clientName}</span>
+                          </div>
+                          <Badge variant="outline" className="ml-3 shrink-0 bg-purple-50 text-purple-700 border-purple-200 text-xs">
+                            {c.count} doc{c.count !== 1 ? "s" : ""}
+                          </Badge>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-t border-border px-4 py-2.5 flex items-center justify-between">
+                    {extra > 0 ? (
+                      <span className="text-xs text-muted-foreground">+{extra} more client{extra !== 1 ? "s" : ""}</span>
+                    ) : <span />}
+                    <Link to="/requests" className="text-xs text-primary font-medium hover:underline">
+                      View all requests →
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="py-4 text-sm text-muted-foreground">No pending reviews.</p>
-            )}
-          </CardContent>
-        </Card>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-400 mb-2" />
+                  <p className="text-sm text-muted-foreground">Nothing to review!</p>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Recent Activity */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="font-display text-base">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {stats?.activity.length ? (
-              <ul className="divide-y divide-border">
-                {stats.activity.map((a) => (
-                  <li key={a.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
-                    <span className="leading-snug">{a.action}</span>
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                      {format(new Date(a.created_at), "d MMM, h:mm a")}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="py-4 text-sm text-muted-foreground">No activity yet.</p>
-            )}
-          </CardContent>
-        </Card>
+        {(() => {
+          const rows = stats?.activity ?? [];
+          const visible = rows.slice(0, 10);
+          return (
+            <div className="rounded-lg border border-border bg-white overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 border-b border-border bg-slate-50 px-4 py-3">
+                <span className="text-sm font-semibold text-slate-700">Recent Activity</span>
+              </div>
+              {rows.length ? (
+                <>
+                  <ul className="flex-1">
+                    {visible.map((a, i) => (
+                      <li key={a.id} className={`px-4 py-3 ${i !== 0 ? "border-t border-border" : ""}`}>
+                        <p className="text-sm leading-snug">{a.action}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {format(new Date(a.created_at), "d MMM, h:mm a")}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-t border-border px-4 py-2.5 flex justify-end">
+                    <Link to="/activity" className="text-xs text-primary font-medium hover:underline">
+                      View all activity →
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+                  <p className="text-sm text-muted-foreground">No activity yet.</p>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
       </div>
     </AppShell>
