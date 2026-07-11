@@ -3,6 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { bootstrapNewUser } from "@/lib/auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,9 +36,10 @@ async function redirectAfterLogin(navigate: ReturnType<typeof useNavigate>) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
-  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-  const roleList = (roles ?? []).map((r) => r.role as string);
-  if (roleList.includes("client")) {
+  // Role check via server function (MySQL) instead of direct Supabase DB query
+  const { getUserRoles } = await import("@/lib/auth.functions");
+  const roles = await getUserRoles({ data: { userId: user.id } });
+  if (roles.includes("client")) {
     navigate({ to: "/portal" });
   } else {
     navigate({ to: "/dashboard" });
@@ -103,7 +105,22 @@ function AuthPage() {
       );
       return;
     }
-    if (data.session) {
+    if (data.session && data.user) {
+      // Bootstrap tenant, profile, role, and trial subscription in MySQL
+      try {
+        await bootstrapNewUser({
+          data: {
+            userId: data.user.id,
+            email: data.user.email ?? parsed.data.email,
+            fullName: parsed.data.fullName,
+            firmName: parsed.data.firmName,
+          },
+        });
+      } catch (bootstrapErr) {
+        console.error("Failed to bootstrap new user in MySQL:", bootstrapErr);
+        toast.error("Account created but workspace setup failed. Please contact support.");
+        return;
+      }
       toast.success("Welcome! Your firm workspace is ready.");
       navigate({ to: "/dashboard" });
     } else {

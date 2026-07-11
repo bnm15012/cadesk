@@ -12,4 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Target Vercel for deployment (overrides the default cloudflare-module preset).
+  // When deploying on Vercel, NITRO_PRESET=vercel is auto-detected, but setting it
+  // here makes it explicit and avoids relying on environment detection.
+  nitro: {
+    preset: "vercel",
+  },
 });
