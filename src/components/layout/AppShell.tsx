@@ -17,9 +17,9 @@ import {
   MoreHorizontal,
   X,
   FileText,
-  KeyRound,
   ChevronDown,
   UserCircle,
+  KeyRound,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { signOut } from "@/lib/auth";
@@ -27,7 +27,7 @@ import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { ChangePasswordModal } from "@/components/ChangePasswordModal";
+import { ProfileModal } from "@/components/ProfileModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [changePassOpen, setChangePassOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState<"profile" | "password" | false>(false);
 
   const performSignOut = useServerFn(signOut);
 
@@ -172,12 +172,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center cursor-pointer">
-            <UserCircle className="mr-2 h-4 w-4" /> Profile
-          </Link>
+        <DropdownMenuItem onClick={() => setProfileOpen("profile")}>
+          <UserCircle className="mr-2 h-4 w-4" /> Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setChangePassOpen(true)}>
+        <DropdownMenuItem onClick={() => setProfileOpen("password")}>
           <KeyRound className="mr-2 h-4 w-4" /> Change password
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -192,7 +190,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <ChangePasswordModal open={changePassOpen} onOpenChange={setChangePassOpen} />
+      <ProfileModal
+        open={!!profileOpen}
+        defaultTab={profileOpen || "profile"}
+        onOpenChange={(v) => setProfileOpen(v ? "profile" : false)}
+      />
 
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-sidebar lg:flex">

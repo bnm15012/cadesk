@@ -165,17 +165,30 @@ function ClientDetailPage() {
     <AppShell>
       {/* Page header banner */}
       <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">{client.name}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            {client.pan && <span>PAN: {client.pan}</span>}
-            {client.gstin && <span>· GSTIN: {client.gstin}</span>}
-            {client.mobile && <span>· {client.mobile}</span>}
-            {client.email && <span>· {client.email}</span>}
-            {client.portal_user_id && (
-              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
-                Portal Active
-              </Badge>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <h1 className="font-display text-2xl font-semibold">{client.name}</h1>
+            <Badge
+              variant="outline"
+              className={client.portal_user_id
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-amber-50 text-amber-700 border-amber-200"}
+            >
+              {client.portal_user_id ? "Portal Active" : "No Portal"}
+            </Badge>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            {client.pan && (
+              <span><span className="text-xs uppercase tracking-wide mr-1">PAN</span><span className="font-medium text-foreground">{client.pan}</span></span>
+            )}
+            {client.gstin && (
+              <span><span className="text-xs uppercase tracking-wide mr-1">GSTIN</span><span className="font-medium text-foreground">{client.gstin}</span></span>
+            )}
+            {client.mobile && (
+              <span><span className="text-xs uppercase tracking-wide mr-1">Mobile</span><span className="font-medium text-foreground">{client.mobile}</span></span>
+            )}
+            {client.email && (
+              <span><span className="text-xs uppercase tracking-wide mr-1">Email</span><span className="font-medium text-foreground">{client.email}</span></span>
             )}
           </div>
         </div>

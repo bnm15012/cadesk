@@ -16,7 +16,6 @@ import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
 import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedFinancialYearsRouteImport } from './routes/_authenticated/financial-years'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -59,11 +58,6 @@ const AuthenticatedRolesRoute = AuthenticatedRolesRouteImport.update({
 const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
@@ -125,7 +119,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financial-years': typeof AuthenticatedFinancialYearsRoute
   '/portal': typeof AuthenticatedPortalRoute
-  '/profile': typeof AuthenticatedProfileRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/roles': typeof AuthenticatedRolesRoute
   '/team': typeof AuthenticatedTeamRoute
@@ -143,7 +136,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financial-years': typeof AuthenticatedFinancialYearsRoute
   '/portal': typeof AuthenticatedPortalRoute
-  '/profile': typeof AuthenticatedProfileRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/roles': typeof AuthenticatedRolesRoute
   '/team': typeof AuthenticatedTeamRoute
@@ -163,7 +155,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/financial-years': typeof AuthenticatedFinancialYearsRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
-  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
@@ -183,7 +174,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/financial-years'
     | '/portal'
-    | '/profile'
     | '/requests'
     | '/roles'
     | '/team'
@@ -201,7 +191,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/financial-years'
     | '/portal'
-    | '/profile'
     | '/requests'
     | '/roles'
     | '/team'
@@ -220,7 +209,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/financial-years'
     | '/_authenticated/portal'
-    | '/_authenticated/profile'
     | '/_authenticated/requests'
     | '/_authenticated/roles'
     | '/_authenticated/team'
@@ -285,13 +273,6 @@ declare module '@tanstack/react-router' {
       path: '/requests'
       fullPath: '/requests'
       preLoaderRoute: typeof AuthenticatedRequestsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/portal': {
@@ -367,7 +348,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinancialYearsRoute: typeof AuthenticatedFinancialYearsRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
   AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
@@ -384,7 +364,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinancialYearsRoute: AuthenticatedFinancialYearsRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
   AuthenticatedRolesRoute: AuthenticatedRolesRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,

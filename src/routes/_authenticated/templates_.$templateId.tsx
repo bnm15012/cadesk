@@ -18,6 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ArrowLeft, Plus, Trash2, GripVertical, Pencil, Save, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/templates_/$templateId")({
@@ -157,7 +162,6 @@ function TemplateEditorPage() {
   };
 
   const handleDeleteTemplate = async () => {
-    if (!confirm("Delete this template? Existing requests are unaffected.")) return;
     try {
       await doDeleteTemplate({ data: { templateId } });
       toast.success("Template deleted");
@@ -215,9 +219,27 @@ function TemplateEditorPage() {
                 </Button>
               )}
               {canManage && (
-                <Button variant="outline" size="sm" onClick={handleDeleteTemplate} className="border-red-300 text-red-600 hover:bg-red-50">
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="border-red-300 text-red-600 hover:bg-red-50">
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete template?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete <strong>{tpl.name}</strong> and all its checklist items. Existing document requests are unaffected.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteTemplate} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           </div>
