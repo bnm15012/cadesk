@@ -211,11 +211,9 @@ function DashboardPage() {
                 <>
                   <ul className="flex-1">
                     {visible.map((a, i) => (
-                      <li key={a.id} className={`px-4 py-3 ${i !== 0 ? "border-t border-border" : ""}`}>
-                        <p className="text-sm leading-snug">{a.action}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {format(new Date(a.created_at), "d MMM, h:mm a")}
-                        </p>
+                      <li key={a.id} className={`flex items-center justify-between gap-3 px-4 py-2.5 ${i !== 0 ? "border-t border-border" : ""}`}>
+                        <span className="text-sm truncate">{a.action}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">{format(new Date(a.created_at), "d MMM, h:mm a")}</span>
                       </li>
                     ))}
                   </ul>
