@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { getPublicPlans } from "@/lib/billing.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -67,16 +68,10 @@ function formatINR(paise: number) {
 }
 
 function Landing() {
+  const fetchPlans = useServerFn(getPublicPlans);
   const { data: plans } = useQuery({
     queryKey: ["public-plans"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("plans")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order");
-      return data ?? [];
-    },
+    queryFn: () => fetchPlans(),
   });
 
   return (
@@ -115,7 +110,7 @@ function Landing() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild size="lg">
-            <Link to="/auth">Register your firm — 14 days free</Link>
+            <Link to="/auth">Register your firm — 7 days free</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link to="/auth">Client login</Link>
@@ -147,7 +142,7 @@ function Landing() {
       <section className="mx-auto max-w-6xl px-4 py-16 lg:px-8">
         <h2 className="text-center font-display text-3xl font-semibold">Simple, honest pricing</h2>
         <p className="mt-3 text-center text-muted-foreground">
-          Every plan starts with a 14-day free trial. No credit card required.
+          Every plan starts with a 7-day free trial. No credit card required.
         </p>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {(plans ?? []).map((plan, i) => (

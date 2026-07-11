@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/billing.functions";
+import { createRazorpayOrder, verifyRazorpayPayment, getPublicPlans, getCurrentSubscription } from "@/lib/billing.functions";
 
 declare global {
   interface Window {
@@ -34,18 +33,7 @@ export const Route = createFileRoute("/_authenticated/billing")({
   component: BillingPage,
 });
 
-interface PlanRow {
-  id: string;
-  name: string;
-  description: string | null;
-  price_monthly: number;
-  price_yearly: number;
-  max_clients: number;
-  max_staff: number;
-  storage_gb: number;
-  max_templates: number;
-  features: Record<string, boolean>;
-}
+type PlanRow = Awaited<ReturnType<typeof getPublicPlans>>[number];
 
 function fmtINR(paise: number) {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -56,29 +44,20 @@ function BillingPage() {
   const queryClient = useQueryClient();
   const createOrder = useServerFn(createRazorpayOrder);
   const verifyPayment = useServerFn(verifyRazorpayPayment);
+  const fetchPlans = useServerFn(getPublicPlans);
+  const fetchSub = useServerFn(getCurrentSubscription);
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
-  const [payingPlanId, setPayingPlanId] = useState<string | null>(null);
+  const [payingPlanId, setPayingPlanId] = useState<number | null>(null);
 
   const { data: plans } = useQuery({
     queryKey: ["plans"],
-    queryFn: async () => {
-      const { data } = await supabase.from("plans").select("*").eq("is_active", true).order("sort_order");
-      return (data ?? []) as unknown as PlanRow[];
-    },
+    queryFn: () => fetchPlans(),
   });
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.tenantId],
-    enabled: !!user?.tenantId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*, plans(name)")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
-    },
+    enabled: !!user,
+    queryFn: () => fetchSub(),
   });
 
   const trialDaysLeft = sub?.current_period_end
@@ -88,7 +67,7 @@ function BillingPage() {
   async function choosePlan(p: PlanRow) {
     setPayingPlanId(p.id);
     try {
-      const result = await createOrder({ data: { planId: p.id, billingPeriod } });
+      const result = await createOrder({ data: { planId: String(p.id), billingPeriod } });
       if (!result.configured) {
         toast.info(
           "Payments aren't live yet — the Razorpay Key ID & Secret still need to be added in Cloud secrets.",
@@ -118,7 +97,7 @@ function BillingPage() {
                 orderId: result.orderId,
                 paymentId: response.razorpay_payment_id,
                 signature: response.razorpay_signature,
-                planId: p.id,
+                planId: String(p.id),
                 billingPeriod,
               },
             });
@@ -157,7 +136,7 @@ function BillingPage() {
                 {sub.status}
               </Badge>
               <span className="text-sm">
-                Plan: <strong>{(sub.plans as { name: string } | null)?.name ?? "Free trial"}</strong>
+                Plan: <strong>{sub.plan_name ?? "Free trial"}</strong>
               </span>
               {sub.status === "trial" && trialDaysLeft !== null && (
                 <span className="text-sm text-muted-foreground">· {trialDaysLeft} days left in trial</span>

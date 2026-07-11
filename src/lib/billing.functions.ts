@@ -1,10 +1,54 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createHmac } from "crypto";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getDb } from "@/lib/db";
 import { payments, plans, profiles, subscriptions } from "@/lib/db/schema";
 import { hasRole } from "@/lib/db/helpers";
+
+/** Returns the current subscription (with plan name) for the logged-in user's tenant. */
+export const getCurrentSubscription = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const tenantId = await (await import("@/lib/db/helpers")).getUserTenant(context.userId);
+    if (!tenantId) return null;
+    const rows = await getDb()
+      .select({
+        id: subscriptions.id,
+        status: subscriptions.status,
+        billing_period: subscriptions.billing_period,
+        current_period_start: subscriptions.current_period_start,
+        current_period_end: subscriptions.current_period_end,
+        plan_name: plans.name,
+      })
+      .from(subscriptions)
+      .leftJoin(plans, eq(subscriptions.plan_id, plans.id))
+      .where(eq(subscriptions.tenant_id, tenantId))
+      .orderBy(desc(subscriptions.created_at))
+      .limit(1);
+    return rows[0] ?? null;
+  });
+
+/** Public — no auth required. Returns active plans ordered by sort_order. */
+export const getPublicPlans = createServerFn({ method: "GET" }).handler(async () => {
+  const rows = await getDb()
+    .select({
+      id: plans.id,
+      name: plans.name,
+      description: plans.description,
+      price_monthly: plans.price_monthly,
+      price_yearly: plans.price_yearly,
+      max_clients: plans.max_clients,
+      max_staff: plans.max_staff,
+      storage_gb: plans.storage_gb,
+      max_templates: plans.max_templates,
+      features: plans.features,
+    })
+    .from(plans)
+    .where(eq(plans.is_active, true))
+    .orderBy(asc(plans.sort_order));
+  return rows.map((r) => ({ ...r, features: (r.features ?? {}) as Record<string, boolean> }));
+});
 
 type BillingPeriod = "monthly" | "yearly";
 
