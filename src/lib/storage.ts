@@ -46,7 +46,7 @@ function getBucket() {
 // ── Get a presigned URL to upload a file directly from the browser ────────────
 export const getUploadUrl = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((d: {
+  .validator((d: {
     storagePath: string;   // e.g. "42/7/3/1720000000000_pan.pdf"
     contentType: string;   // e.g. "application/pdf"
     contentLength: number; // file size in bytes
@@ -75,7 +75,7 @@ export const getUploadUrl = createServerFn({ method: "POST" })
 // ── Get a presigned URL to download / view a file ────────────────────────────
 export const getDownloadUrl = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((d: { storagePath: string; fileName: string }) => d)
+  .validator((d: { storagePath: string; fileName: string }) => d)
   .handler(async ({ data }) => {
     const s3 = getS3();
     const bucket = getBucket();
@@ -94,7 +94,7 @@ export const getDownloadUrl = createServerFn({ method: "POST" })
 // ── Delete a file from R2 ─────────────────────────────────────────────────────
 export const deleteStorageFile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((d: { storagePath: string }) => d)
+  .validator((d: { storagePath: string }) => d)
   .handler(async ({ data }) => {
     const s3 = getS3();
     const bucket = getBucket();

@@ -37,7 +37,7 @@ const addClientSchema = z.object({
 
 export const addClient = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => addClientSchema.parse(input))
+  .validator((input: unknown) => addClientSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

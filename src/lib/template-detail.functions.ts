@@ -8,7 +8,7 @@ import { getUserTenant } from "@/lib/db/helpers";
 
 export const getTemplate = createServerFn({ method: "GET" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ templateId: z.number().int().positive() }).parse(input)
   )
   .handler(async ({ data, context }) => {
@@ -67,7 +67,7 @@ const addItemSchema = z.object({
 
 export const addTemplateItem = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => addItemSchema.parse(input))
+  .validator((input: unknown) => addItemSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -100,7 +100,7 @@ const updateItemSchema = z.object({
 
 export const updateTemplateItem = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => updateItemSchema.parse(input))
+  .validator((input: unknown) => updateItemSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -122,7 +122,7 @@ const removeItemSchema = z.object({
 
 export const removeTemplateItem = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => removeItemSchema.parse(input))
+  .validator((input: unknown) => removeItemSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -145,7 +145,7 @@ const updateTemplateSchema = z.object({
 
 export const updateTemplate = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => updateTemplateSchema.parse(input))
+  .validator((input: unknown) => updateTemplateSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -173,7 +173,7 @@ const deleteTemplateSchema = z.object({
 
 export const deleteTemplate = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => deleteTemplateSchema.parse(input))
+  .validator((input: unknown) => deleteTemplateSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

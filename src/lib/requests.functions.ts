@@ -139,7 +139,7 @@ const createRequestSchema = z.object({
 
 export const createRequest = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => createRequestSchema.parse(input))
+  .validator((input: unknown) => createRequestSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

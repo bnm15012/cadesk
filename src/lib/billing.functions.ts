@@ -67,7 +67,7 @@ async function getTenantForAdmin(context: { userId: string }) {
 
 export const createRazorpayOrder = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((d: { planId: string; billingPeriod: BillingPeriod }) => d)
+  .validator((d: { planId: string; billingPeriod: BillingPeriod }) => d)
   .handler(async ({ data, context }) => {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -132,7 +132,7 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
 
 export const verifyRazorpayPayment = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator(
+  .validator(
     (d: {
       orderId: string;
       paymentId: string;

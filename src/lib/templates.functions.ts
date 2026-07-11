@@ -41,7 +41,7 @@ const createTemplateSchema = z.object({
 
 export const createTemplate = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => createTemplateSchema.parse(input))
+  .validator((input: unknown) => createTemplateSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

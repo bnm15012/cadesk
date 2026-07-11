@@ -17,7 +17,7 @@ const TRIAL_DAYS = 7;
  * Used client-side after login to decide which route to redirect to.
  */
 export const getUserRoles = createServerFn({ method: "GET" })
-  .inputValidator((d: { userId: string }) => d)
+  .validator((d: { userId: string }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
     const { user_roles } = await import("@/lib/db/schema");
@@ -31,7 +31,7 @@ export const getUserRoles = createServerFn({ method: "GET" })
 
 export const bootstrapNewUser = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator(
+  .validator(
     (d: {
       userId: string;
       email: string;

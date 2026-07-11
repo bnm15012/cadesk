@@ -19,7 +19,7 @@ const inviteTeamSchema = z.object({
 
 export const inviteTeamMember = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => inviteTeamSchema.parse(input))
+  .validator((input: unknown) => inviteTeamSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
 
@@ -86,7 +86,7 @@ const clientLoginSchema = z.object({
 
 export const createClientLogin = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => clientLoginSchema.parse(input))
+  .validator((input: unknown) => clientLoginSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
 
@@ -160,7 +160,7 @@ const removeMemberSchema = z.object({ memberUserId: z.string() });
 
 export const removeTeamMember = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => removeMemberSchema.parse(input))
+  .validator((input: unknown) => removeMemberSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     if (data.memberUserId === userId) throw new Error("You cannot remove yourself");

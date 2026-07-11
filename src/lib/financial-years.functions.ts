@@ -37,7 +37,7 @@ const createFYSchema = z.object({
 
 export const createFinancialYear = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => createFYSchema.parse(input))
+  .validator((input: unknown) => createFYSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -64,7 +64,7 @@ const toggleFYSchema = z.object({
 
 export const toggleFinancialYearActive = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => toggleFYSchema.parse(input))
+  .validator((input: unknown) => toggleFYSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

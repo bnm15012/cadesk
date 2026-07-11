@@ -162,7 +162,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
 
 // ── signUp ────────────────────────────────────────────────────────────────────
 export const signUp = createServerFn({ method: "POST" })
-  .inputValidator((d: {
+  .validator((d: {
     email: string;
     password: string;
     fullName: string;
@@ -264,7 +264,7 @@ export const signUp = createServerFn({ method: "POST" })
 
 // ── signIn ────────────────────────────────────────────────────────────────────
 export const signIn = createServerFn({ method: "POST" })
-  .inputValidator((d: { email: string; password: string }) => d)
+  .validator((d: { email: string; password: string }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
     const { users } = await import("@/lib/db/schema");
@@ -312,7 +312,7 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
 
 // ── sendOtp — for forgot password ─────────────────────────────────────────────
 export const sendOtp = createServerFn({ method: "POST" })
-  .inputValidator((d: { email: string }) => d)
+  .validator((d: { email: string }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
     const { users, otps } = await import("@/lib/db/schema");
@@ -337,7 +337,7 @@ export const sendOtp = createServerFn({ method: "POST" })
 
 // ── verifyOtp ─────────────────────────────────────────────────────────────────
 export const verifyOtp = createServerFn({ method: "POST" })
-  .inputValidator((d: { email: string; code: string }) => d)
+  .validator((d: { email: string; code: string }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
     const { otps } = await import("@/lib/db/schema");
@@ -372,7 +372,7 @@ export const verifyOtp = createServerFn({ method: "POST" })
 
 // ── resetPassword ─────────────────────────────────────────────────────────────
 export const resetPassword = createServerFn({ method: "POST" })
-  .inputValidator((d: { email: string; resetToken: string; newPassword: string }) => d)
+  .validator((d: { email: string; resetToken: string; newPassword: string }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
     const { users, otps } = await import("@/lib/db/schema");
@@ -398,7 +398,7 @@ export const resetPassword = createServerFn({ method: "POST" })
 
 // ── changePassword — for logged-in users ─────────────────────────────────────
 export const changePassword = createServerFn({ method: "POST" })
-  .inputValidator((d: { newPassword: string }) => d)
+  .validator((d: { newPassword: string }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
     const { sessions, users } = await import("@/lib/db/schema");

@@ -17,7 +17,7 @@ import { getUserTenant } from "@/lib/db/helpers";
 
 export const getRequestDetail = createServerFn({ method: "GET" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ requestId: z.number().int().positive() }).parse(input)
   )
   .handler(async ({ data, context }) => {
@@ -115,7 +115,7 @@ export const getRequestDetail = createServerFn({ method: "GET" })
 
 export const getComments = createServerFn({ method: "GET" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ itemId: z.number().int().positive() }).parse(input)
   )
   .handler(async ({ data, context }) => {
@@ -163,7 +163,7 @@ const addItemSchema = z.object({
 
 export const addRequestItem = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => addItemSchema.parse(input))
+  .validator((input: unknown) => addItemSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -196,7 +196,7 @@ const updateItemStatusSchema = z.object({
 
 export const updateItemStatus = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => updateItemStatusSchema.parse(input))
+  .validator((input: unknown) => updateItemStatusSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -233,7 +233,7 @@ const removeItemSchema = z.object({
 
 export const removeRequestItem = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => removeItemSchema.parse(input))
+  .validator((input: unknown) => removeItemSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -259,7 +259,7 @@ const insertDocFileSchema = z.object({
 
 export const insertDocumentFile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => insertDocFileSchema.parse(input))
+  .validator((input: unknown) => insertDocFileSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -303,7 +303,7 @@ const deleteDocFileSchema = z.object({
 
 export const deleteDocumentFile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => deleteDocFileSchema.parse(input))
+  .validator((input: unknown) => deleteDocFileSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -329,7 +329,7 @@ const markCompletedSchema = z.object({
 
 export const markRequestCompleted = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => markCompletedSchema.parse(input))
+  .validator((input: unknown) => markCompletedSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -367,7 +367,7 @@ const addCommentSchema = z.object({
 
 export const addComment = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => addCommentSchema.parse(input))
+  .validator((input: unknown) => addCommentSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

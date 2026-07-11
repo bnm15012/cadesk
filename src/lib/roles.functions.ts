@@ -48,7 +48,7 @@ const createRoleSchema = z.object({
 
 export const createRole = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => createRoleSchema.parse(input))
+  .validator((input: unknown) => createRoleSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -75,7 +75,7 @@ const togglePermSchema = z.object({
 
 export const togglePermission = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => togglePermSchema.parse(input))
+  .validator((input: unknown) => togglePermSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -109,7 +109,7 @@ const deleteRoleSchema = z.object({
 
 export const deleteRole = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => deleteRoleSchema.parse(input))
+  .validator((input: unknown) => deleteRoleSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

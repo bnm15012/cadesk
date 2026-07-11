@@ -66,7 +66,7 @@ const toggleCustomRoleSchema = z.object({
 
 export const toggleCustomRole = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => toggleCustomRoleSchema.parse(input))
+  .validator((input: unknown) => toggleCustomRoleSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);

@@ -16,7 +16,7 @@ import { getUserTenant } from "@/lib/db/helpers";
 
 export const getClientDetail = createServerFn({ method: "GET" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ clientId: z.number().int().positive() }).parse(input)
   )
   .handler(async ({ data, context }) => {
@@ -124,7 +124,7 @@ const toggleAssignmentSchema = z.object({
 
 export const toggleAssignment = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => toggleAssignmentSchema.parse(input))
+  .validator((input: unknown) => toggleAssignmentSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
@@ -170,7 +170,7 @@ const deleteClientSchema = z.object({
 
 export const deleteClient = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => deleteClientSchema.parse(input))
+  .validator((input: unknown) => deleteClientSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
