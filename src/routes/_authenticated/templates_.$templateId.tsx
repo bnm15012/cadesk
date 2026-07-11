@@ -38,6 +38,10 @@ function TemplateEditorPage() {
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [saving, setSaving] = useState(false);
+  // Per-item edit state: itemId → { name, category }
+  const [editingItem, setEditingItem] = useState<number | null>(null);
+  const [itemEditName, setItemEditName] = useState("");
+  const [itemEditCategory, setItemEditCategory] = useState("");
 
   const fetchTemplate = useServerFn(getTemplate);
   const doAddItem = useServerFn(addTemplateItem);
@@ -117,6 +121,31 @@ function TemplateEditorPage() {
     }
   };
 
+  const startEditItem = (it: { id: number; name: string; category: string | null }) => {
+    setEditingItem(it.id);
+    setItemEditName(it.name);
+    setItemEditCategory(it.category ?? "");
+  };
+
+  const cancelEditItem = () => {
+    setEditingItem(null);
+    setItemEditName("");
+    setItemEditCategory("");
+  };
+
+  const saveEditItem = async (id: number) => {
+    if (!itemEditName.trim()) { toast.error("Item name is required"); return; }
+    try {
+      await handleUpdateItem(id, {
+        name: itemEditName.trim(),
+        category: itemEditCategory.trim() || null,
+      });
+      setEditingItem(null);
+    } catch {
+      // error already toasted in handleUpdateItem
+    }
+  };
+
   const handleUpdateTemplate = async (patch: Partial<{ name: string; description: string | null }>) => {
     try {
       await doUpdateTemplate({ data: { templateId, patch } });
@@ -147,100 +176,111 @@ function TemplateEditorPage() {
     <AppShell>
       {/* Page header banner */}
       <div className="rounded-lg px-6 py-5 mb-6 bg-white border-l-4 border-l-slate-700 border border-border shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h1 className="font-display text-2xl font-semibold truncate">{tpl.name}</h1>
-            {tpl.description && <p className="mt-1 text-muted-foreground text-sm truncate">{tpl.description}</p>}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" asChild>
-              <Link to="/templates">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Link>
-            </Button>
-            {canManage && (
-              <Button variant="secondary" size="sm" onClick={handleDeleteTemplate} className="text-red-600 hover:text-red-700">
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
+        {editing ? (
+          <div className="space-y-3">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="font-display text-xl font-semibold"
+              placeholder="Template name *"
+              autoFocus
+            />
+            <Input
+              value={editDesc}
+              onChange={(e) => setEditDesc(e.target.value)}
+              placeholder="Description (optional)"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSaveTemplate} disabled={saving}>
+                <Save className="mr-2 h-4 w-4" /> {saving ? "Saving…" : "Save"}
               </Button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <Card className="mb-6 bg-white">
-        <CardContent className="pt-5">
-          {editing ? (
-            <div className="space-y-3">
-              <Input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="font-display text-xl font-semibold"
-                placeholder="Template name *"
-                autoFocus
-              />
-              <Input
-                value={editDesc}
-                onChange={(e) => setEditDesc(e.target.value)}
-                placeholder="Description (optional)"
-              />
-              <div className="flex gap-2">
-                <Button onClick={handleSaveTemplate} disabled={saving}>
-                  <Save className="mr-2 h-4 w-4" /> {saving ? "Saving…" : "Save"}
-                </Button>
-                <Button variant="outline" onClick={() => { setEditing(false); setEditName(tpl.name); setEditDesc(tpl.description ?? ""); }}>
-                  <X className="mr-2 h-4 w-4" /> Cancel
-                </Button>
-              </div>
+              <Button size="sm" variant="outline" onClick={() => { setEditing(false); setEditName(tpl.name); setEditDesc(tpl.description ?? ""); }}>
+                <X className="mr-2 h-4 w-4" /> Cancel
+              </Button>
             </div>
-          ) : (
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-display text-xl font-semibold">{tpl.name}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{tpl.description || "No description"}</p>
-              </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="font-display text-2xl font-semibold">{tpl.name}</h1>
+              {tpl.description && <p className="mt-1 text-muted-foreground text-sm">{tpl.description}</p>}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/templates"><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link>
+              </Button>
               {canManage && (
                 <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
                   <Pencil className="mr-2 h-4 w-4" /> Edit
                 </Button>
               )}
+              {canManage && (
+                <Button variant="outline" size="sm" onClick={handleDeleteTemplate} className="border-red-300 text-red-600 hover:bg-red-50">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
       <Card>
         <CardContent className="pt-6">
           <p className="mb-3 font-medium">Checklist items ({templateData.items.length})</p>
           <ul className="space-y-2">
             {templateData.items.map((it) => (
-              <li key={it.id} className="flex items-center gap-3 rounded-md border border-border p-3">
-                <GripVertical className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1 space-y-1">
-                  <Input
-                    defaultValue={it.name}
-                    onBlur={(e) => e.target.value !== it.name && handleUpdateItem(it.id, { name: e.target.value })}
-                    disabled={!canManage}
-                  />
-                  <Input
-                    defaultValue={it.category ?? ""}
-                    placeholder="Category (optional)"
-                    onBlur={(e) => handleUpdateItem(it.id, { category: e.target.value || null })}
-                    disabled={!canManage}
-                    className="text-xs"
-                  />
-                </div>
-                <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Checkbox checked={it.is_required} onCheckedChange={(v) => handleUpdateItem(it.id, { is_required: !!v })} disabled={!canManage} />
-                  Required
-                </label>
-                <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Checkbox checked={it.is_repeatable} onCheckedChange={(v) => handleUpdateItem(it.id, { is_repeatable: !!v })} disabled={!canManage} />
-                  Multi-file
-                </label>
-                {canManage && (
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(it.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+              <li key={it.id} className="rounded-md border border-border p-3">
+                {editingItem === it.id ? (
+                  /* ── Edit mode ── */
+                  <div className="space-y-2">
+                    <Input
+                      value={itemEditName}
+                      onChange={(e) => setItemEditName(e.target.value)}
+                      placeholder="Item name *"
+                      autoFocus
+                    />
+                    <Input
+                      value={itemEditCategory}
+                      onChange={(e) => setItemEditCategory(e.target.value)}
+                      placeholder="Category (optional)"
+                      className="text-xs"
+                    />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" onClick={() => saveEditItem(it.id)}>
+                        <Save className="mr-1 h-3 w-3" /> Save
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={cancelEditItem}>
+                        <X className="mr-1 h-3 w-3" /> Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── View mode ── */
+                  <div className="flex items-center gap-3">
+                    <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{it.name}</p>
+                      {it.category && <p className="text-xs text-muted-foreground">{it.category}</p>}
+                    </div>
+                    <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Checkbox checked={it.is_required} onCheckedChange={(v) => handleUpdateItem(it.id, { is_required: !!v })} disabled={!canManage} />
+                      Required
+                    </label>
+                    <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Checkbox checked={it.is_repeatable} onCheckedChange={(v) => handleUpdateItem(it.id, { is_repeatable: !!v })} disabled={!canManage} />
+                      Multi-file
+                    </label>
+                    {canManage && (
+                      <>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-amber-600 hover:text-amber-700 hover:bg-amber-50" onClick={() => startEditItem(it)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleRemoveItem(it.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 )}
               </li>
             ))}

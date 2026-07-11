@@ -3,7 +3,7 @@ import { z } from "zod";
 import { and, asc, eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
-import { role_permissions, roles } from "@/lib/db/schema";
+import { role_permissions, roles, user_custom_roles } from "@/lib/db/schema";
 import { getUserTenant } from "@/lib/db/helpers";
 
 export const getRolesAndPermissions = createServerFn({ method: "GET" })
@@ -117,9 +117,10 @@ export const deleteRole = createServerFn({ method: "POST" })
 
     const db = getDb();
 
-    await db
-      .delete(roles)
-      .where(and(eq(roles.id, data.roleId), eq(roles.tenant_id, tenantId)));
+    // Delete child rows first to avoid FK constraint errors
+    await db.delete(role_permissions).where(eq(role_permissions.role_id, data.roleId));
+    await db.delete(user_custom_roles).where(eq(user_custom_roles.role_id, data.roleId));
+    await db.delete(roles).where(and(eq(roles.id, data.roleId), eq(roles.tenant_id, tenantId)));
 
     return { ok: true };
   });

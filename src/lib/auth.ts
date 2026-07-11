@@ -173,7 +173,7 @@ export const signUp = createServerFn({ method: "POST" })
   }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
-    const { users, tenants, profiles, user_roles, subscriptions, plans } =
+    const { users, tenants, profiles, user_roles, subscriptions, plans, roles } =
       await import("@/lib/db/schema");
 
     const db = getDb();
@@ -225,6 +225,12 @@ export const signUp = createServerFn({ method: "POST" })
       role: "ca_admin",
       tenant_id: tenantId,
     });
+
+    // Seed default Manager and Staff roles for the new tenant
+    await db.insert(roles).values([
+      { name: "Manager", description: "Can manage clients, requests and team assignments", tenant_id: tenantId, created_at: now },
+      { name: "Staff", description: "Can view and work on assigned clients and requests", tenant_id: tenantId, created_at: now },
+    ]);
 
     // Get starter plan
     const [starterPlan] = await db.select({ id: plans.id }).from(plans).where(eq(plans.name, "Starter")).limit(1);

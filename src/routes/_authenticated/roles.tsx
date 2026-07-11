@@ -23,6 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Plus, Trash2, ShieldCheck } from "lucide-react";
 
@@ -40,6 +42,7 @@ function RolesPage() {
   const doDeleteRole = useServerFn(deleteRole);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["roles-permissions"],
@@ -79,11 +82,12 @@ function RolesPage() {
     }
   };
 
-  const handleDeleteRole = async (roleId: number, name: string) => {
-    if (!confirm(`Delete role "${name}"? Members holding it will lose its permissions.`)) return;
+  const handleDeleteRole = async () => {
+    if (!deleteTarget) return;
     try {
-      await doDeleteRole({ data: { roleId, roleName: name } });
+      await doDeleteRole({ data: { roleId: deleteTarget.id, roleName: deleteTarget.name } });
       toast.success("Role deleted");
+      setDeleteTarget(null);
       queryClient.invalidateQueries({ queryKey: ["roles-permissions"] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete role");
@@ -154,8 +158,8 @@ function RolesPage() {
                       <p className="mt-1 text-sm text-muted-foreground">{role.description}</p>
                     )}
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteRole(role.id, role.name)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ id: role.id, name: role.name })}>
+                    <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                 </CardHeader>
                 <CardContent>
@@ -192,6 +196,21 @@ function RolesPage() {
           })}
         </div>
       )}
+      {/* Delete confirmation dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete role "{deleteTarget?.name}"?</DialogTitle>
+            <DialogDescription>
+              Members currently holding this role will lose all its permissions. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteRole}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
