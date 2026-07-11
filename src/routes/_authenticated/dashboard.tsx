@@ -7,7 +7,7 @@ import { getDashboardStats } from "@/lib/dashboard.functions";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, FolderOpen, CheckCircle2, Clock, UserCog, CreditCard } from "lucide-react";
+import { Users, FolderOpen, CheckCircle2, Clock, UserCog, CreditCard, Upload, FileSearch } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -79,29 +79,95 @@ function DashboardPage() {
         ))}
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {stats?.activity.length ? (
-            <ul className="divide-y divide-border">
-              {stats.activity.map((a) => (
-                <li key={a.id} className="flex items-center justify-between gap-4 py-3 text-sm">
-                  <span>{a.action}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {format(new Date(a.created_at), "d MMM, h:mm a")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="py-4 text-sm text-muted-foreground">
-              No activity yet. Start by adding your first client.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Pending breakdown + Recent Activity */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+
+        {/* Pending Uploads by Client */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="font-display text-base flex items-center gap-2">
+              <Upload className="h-4 w-4 text-amber-500" /> Pending Uploads
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {stats?.pendingUploadsByClient?.length ? (
+              <ul className="divide-y divide-border">
+                {stats.pendingUploadsByClient.map((c) => (
+                  <li key={c.clientId}>
+                    <Link
+                      to="/clients/$clientId"
+                      params={{ clientId: String(c.clientId) }}
+                      className="flex items-center justify-between py-2.5 text-sm hover:text-primary"
+                    >
+                      <span className="truncate">{c.clientName}</span>
+                      <Badge variant="outline" className="ml-2 shrink-0 bg-amber-50 text-amber-700 border-amber-200">
+                        {c.count} doc{c.count !== 1 ? "s" : ""}
+                      </Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="py-4 text-sm text-muted-foreground">No pending uploads.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pending Reviews by Client */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="font-display text-base flex items-center gap-2">
+              <FileSearch className="h-4 w-4 text-purple-500" /> Pending Reviews
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {stats?.pendingReviewsByClient?.length ? (
+              <ul className="divide-y divide-border">
+                {stats.pendingReviewsByClient.map((c) => (
+                  <li key={c.clientId}>
+                    <Link
+                      to="/clients/$clientId"
+                      params={{ clientId: String(c.clientId) }}
+                      className="flex items-center justify-between py-2.5 text-sm hover:text-primary"
+                    >
+                      <span className="truncate">{c.clientName}</span>
+                      <Badge variant="outline" className="ml-2 shrink-0 bg-purple-50 text-purple-700 border-purple-200">
+                        {c.count} doc{c.count !== 1 ? "s" : ""}
+                      </Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="py-4 text-sm text-muted-foreground">No pending reviews.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="font-display text-base">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {stats?.activity.length ? (
+              <ul className="divide-y divide-border">
+                {stats.activity.map((a) => (
+                  <li key={a.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
+                    <span className="leading-snug">{a.action}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {format(new Date(a.created_at), "d MMM, h:mm a")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="py-4 text-sm text-muted-foreground">No activity yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+      </div>
     </AppShell>
   );
 }

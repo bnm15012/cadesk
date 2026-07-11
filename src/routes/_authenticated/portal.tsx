@@ -7,7 +7,7 @@ import { getPortalRequests } from "@/lib/portal.functions";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FolderOpen, ChevronRight } from "lucide-react";
+import { FolderOpen, ChevronRight, CheckCircle2, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   head: () => ({ meta: [{ title: "My Documents — CADesk" }] }),
@@ -52,24 +52,47 @@ function PortalPage() {
           {(requests ?? []).map((r) => {
             const items = r.request_items;
             const pending = items.filter((i) => i.status === "pending" || i.status === "reupload_required").length;
+            const submitted = items.filter((i) => i.status !== "pending" && i.status !== "reupload_required").length;
             const total = items.length;
+            const pct = total > 0 ? Math.round((submitted / total) * 100) : 0;
+            const allDone = pending === 0;
             return (
               <Link key={r.id} to="/requests/$requestId" params={{ requestId: String(r.id) }}>
                 <Card className="transition-shadow hover:shadow-md">
-                  <CardContent className="flex items-center justify-between pt-6">
-                    <div>
-                      <p className="font-medium">{r.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {r.fyLabel} · {total - pending}/{total} submitted
-                      </p>
+                  <CardContent className="pt-5 pb-4">
+                    {/* Top row: title + FY badge + status */}
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-base">{r.title}</p>
+                        <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200 font-mono text-xs">
+                          {r.fyLabel}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {allDone ? (
+                          <Badge className="bg-green-100 text-green-700 border-green-200 flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> All submitted
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> {pending} pending
+                          </Badge>
+                        )}
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {pending > 0 ? (
-                        <Badge variant="secondary">{pending} pending</Badge>
-                      ) : (
-                        <Badge>All submitted</Badge>
-                      )}
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    {/* Progress bar */}
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>{submitted} of {total} documents submitted</span>
+                        <span>{pct}%</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-slate-100">
+                        <div
+                          className={`h-1.5 rounded-full transition-all ${allDone ? "bg-green-500" : "bg-amber-400"}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

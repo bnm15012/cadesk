@@ -1,10 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
 import {
   activity_logs,
   clients,
+  document_requests,
   plans,
   request_items,
   subscriptions,
@@ -21,7 +22,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
 
     const db = getDb();
 
-    const [clientRows, itemRows, staffRows, subRows, activityRows] =
+    const [clientRows, itemRows, staffRows, subRows, activityRows, pendingByClientRows, reviewByClientRows] =
       await Promise.all([
         db
           .select({ id: clients.id })
@@ -61,6 +62,42 @@ export const getDashboardStats = createServerFn({ method: "GET" })
           .where(eq(activity_logs.tenant_id, tenantId))
           .orderBy(desc(activity_logs.created_at))
           .limit(8),
+        // Pending uploads per client
+        db
+          .select({
+            clientId: clients.id,
+            clientName: clients.name,
+            count: sql<number>`count(*)`.as("count"),
+          })
+          .from(request_items)
+          .innerJoin(document_requests, eq(request_items.request_id, document_requests.id))
+          .innerJoin(clients, eq(document_requests.client_id, clients.id))
+          .where(
+            and(
+              eq(request_items.tenant_id, tenantId),
+              inArray(request_items.status, ["pending", "reupload_required"])
+            )
+          )
+          .groupBy(clients.id, clients.name)
+          .orderBy(desc(sql`count(*)`)),
+        // Pending reviews per client
+        db
+          .select({
+            clientId: clients.id,
+            clientName: clients.name,
+            count: sql<number>`count(*)`.as("count"),
+          })
+          .from(request_items)
+          .innerJoin(document_requests, eq(request_items.request_id, document_requests.id))
+          .innerJoin(clients, eq(document_requests.client_id, clients.id))
+          .where(
+            and(
+              eq(request_items.tenant_id, tenantId),
+              inArray(request_items.status, ["uploaded", "under_review"])
+            )
+          )
+          .groupBy(clients.id, clients.name)
+          .orderBy(desc(sql`count(*)`)),
       ]);
 
     const statuses = itemRows.map((i) => i.status);
@@ -100,6 +137,16 @@ export const getDashboardStats = createServerFn({ method: "GET" })
         id: a.id,
         action: a.action,
         created_at: a.created_at.toISOString(),
+      })),
+      pendingUploadsByClient: pendingByClientRows.map((r) => ({
+        clientId: r.clientId,
+        clientName: r.clientName,
+        count: Number(r.count),
+      })),
+      pendingReviewsByClient: reviewByClientRows.map((r) => ({
+        clientId: r.clientId,
+        clientName: r.clientName,
+        count: Number(r.count),
       })),
     };
   });

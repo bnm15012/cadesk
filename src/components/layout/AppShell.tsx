@@ -25,7 +25,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { signOut } from "@/lib/auth";
 import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ProfileModal } from "@/components/ProfileModal";
 import {
@@ -167,9 +166,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               {user?.isCaAdmin ? "CA Admin" : user?.isClient ? "Client" : user?.roles?.[0] ?? "—"}
             </span>
           </p>
-          {user?.isClient && (
-            <Badge variant="outline" className="mt-1 text-xs">Client portal</Badge>
-          )}
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setProfileOpen("profile")}>
