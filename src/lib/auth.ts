@@ -173,7 +173,7 @@ export const signUp = createServerFn({ method: "POST" })
   }) => d)
   .handler(async ({ data }) => {
     const { getDb } = await import("@/lib/db");
-    const { users, tenants, profiles, user_roles, subscriptions, plans, roles, financial_years } =
+    const { users, tenants, profiles, user_roles, subscriptions, plans, roles, financial_years, document_templates, template_items } =
       await import("@/lib/db/schema");
 
     const db = getDb();
@@ -253,6 +253,100 @@ export const signUp = createServerFn({ method: "POST" })
       buildFY(prevFYStartYear, false),   // e.g. FY 24-25 — inactive
       buildFY(currentFYStartYear, true), // e.g. FY 25-26 — active
     ]);
+
+    // Seed default document templates
+    const defaultTemplates: Array<{ name: string; description: string; items: string[] }> = [
+      {
+        name: "ITR — Salaried Individual",
+        description: "Standard checklist for salaried income tax return (ITR-1 / ITR-2)",
+        items: ["Form 16 (from employer)", "Bank statements (all accounts)", "Investment proofs (80C — LIC, PPF, ELSS, etc.)", "Home loan interest certificate (80EE / 24b)", "Rent receipts / Rental agreement (HRA)", "Health insurance premium receipt (80D)", "NPS contribution proof (80CCD)", "Other income details (FD interest, dividends)", "Aadhaar copy", "PAN copy"],
+      },
+      {
+        name: "ITR — Business / Profession (44AD / 44ADA)",
+        description: "Presumptive taxation for small business or professional (ITR-4)",
+        items: ["PAN copy", "Aadhaar copy", "Bank statements (all business accounts)", "Gross turnover / gross receipts figure", "GST returns (if registered)", "Loan account statements", "Investment proofs (80C / 80D)", "Advance tax / self-assessment tax challans"],
+      },
+      {
+        name: "ITR — Business with Books (ITR-3)",
+        description: "Regular business / profession requiring books of accounts",
+        items: ["PAN copy", "Aadhaar copy", "Trading & Profit-Loss account", "Balance sheet", "Bank statements (all accounts)", "GST returns (GSTR-1 and GSTR-3B)", "TDS certificates (Form 26AS / AIS)", "Fixed asset details", "Loan account statements", "Investment proofs (80C / 80D)", "Advance tax / self-assessment tax challans"],
+      },
+      {
+        name: "ITR — Senior Citizen",
+        description: "For individuals above 60 with pension and interest income",
+        items: ["PAN copy", "Aadhaar copy", "Pension certificate / Form 16 from employer / pension authority", "Bank statements (all accounts)", "FD interest certificates (all banks)", "Health insurance premium receipt (80D — higher limit for senior citizens)", "Medical expenditure receipts (80D — no insurance)", "Investment proofs (80C)", "Form 26AS / AIS"],
+      },
+      {
+        name: "GST — Monthly Return (GSTR-1 & 3B)",
+        description: "Monthly filing for regular GST taxpayers (turnover > ₹1.5 Cr or opted out of QRMP)",
+        items: ["Sales invoices (B2B with GST no., B2C)", "Purchase invoices", "Credit notes / Debit notes", "Bank statement for the month", "Expense bills (rent, telephone, utilities, etc.)", "Import / export invoices (if applicable)", "E-way bill details (if applicable)"],
+      },
+      {
+        name: "GST — Quarterly Return (QRMP Scheme)",
+        description: "Quarterly filing for small taxpayers (turnover up to ₹5 Cr) under QRMP",
+        items: ["Sales invoices for the quarter (B2B and B2C)", "Purchase invoices for the quarter", "Credit notes / Debit notes", "Bank statements (all 3 months)", "Expense bills for the quarter", "Monthly tax payment challans (PMT-06, if paid monthly)"],
+      },
+      {
+        name: "GST — Annual Return (GSTR-9)",
+        description: "Year-end reconciliation and annual return for regular taxpayers",
+        items: ["All 12 months GSTR-1 filed copies", "All 12 months GSTR-3B filed copies", "Audited financials (P&L and Balance sheet)", "GSTR-2A / 2B reconciliation statement", "ITC register (purchase register for the year)", "HSN-wise summary of supplies", "List of advances received and adjusted", "RCM (Reverse Charge Mechanism) details"],
+      },
+      {
+        name: "Tax Audit (Section 44AB)",
+        description: "Tax audit report for businesses / professionals exceeding turnover threshold",
+        items: ["Audited P&L and Balance sheet", "Bank statements (all accounts, full year)", "Trial balance", "Ledger extracts (major heads)", "Fixed asset register with depreciation", "Stock / inventory statement (opening and closing)", "Loan account statements", "TDS certificates received (Form 16A)", "TDS deducted details (salary, contractor, etc.)", "GST returns for all months", "Advance tax challans", "Previous year audit report (Form 3CA / 3CB)"],
+      },
+      {
+        name: "Company Statutory Audit (Pvt Ltd / Ltd)",
+        description: "Statutory audit checklist under Companies Act 2013",
+        items: ["Bank statements (all accounts, full year)", "Trial balance", "Ledger extracts", "Fixed asset register", "Stock statement (physical verification report)", "Debtors and creditors ageing list", "Loan agreements (secured and unsecured)", "Statutory dues challans (PF, ESI, TDS, GST, PT)", "Board minutes / resolutions", "Incorporation certificate and MoA/AoA", "Previous year financials", "ROC filings (MGT-7, AOC-4) of previous year"],
+      },
+      {
+        name: "LLP Audit",
+        description: "Annual audit checklist for Limited Liability Partnerships",
+        items: ["LLP agreement", "Bank statements (all accounts, full year)", "Trial balance", "Ledger extracts", "Fixed asset register", "Partners' capital account details", "Loan statements", "GST returns", "TDS returns", "Previous year financials", "Form 8 and Form 11 of previous year (ROC filings)"],
+      },
+      {
+        name: "TDS Return — Salary (24Q)",
+        description: "Quarterly TDS return for salary deductions",
+        items: ["Salary register / payroll summary for the quarter", "Employee PAN details", "Form 16 / investment declaration from employees", "TDS challan (ITNS 281) payment proofs", "Deductor PAN and TAN", "Previous quarter 24Q acknowledgement"],
+      },
+      {
+        name: "TDS Return — Non-Salary (26Q)",
+        description: "Quarterly TDS return for contractor, rent, professional payments",
+        items: ["Vendor / deductee PAN details", "Payment details (nature of payment, amount, TDS deducted)", "TDS challan (ITNS 281) payment proofs", "Invoices for payments made (contractor, rent, interest, professional fees)", "Deductor PAN and TAN", "Previous quarter 26Q acknowledgement"],
+      },
+      {
+        name: "ROC Annual Filing (Pvt Ltd — AOC-4 & MGT-7)",
+        description: "Annual return and financial statement filing with MCA / ROC",
+        items: ["Audited Balance sheet and P&L", "Auditor's report", "Director's report", "Board resolution for adoption of accounts", "List of directors with DIN and addresses", "List of shareholders with shareholding pattern", "MGT-8 (if applicable — listed company or ≥ 10 Cr paid-up capital)", "CIN (Corporate Identification Number)"],
+      },
+      {
+        name: "Import / Export — EXIM Compliance",
+        description: "Documents for businesses with import/export transactions",
+        items: ["IEC (Import Export Code) certificate", "Shipping bills / Bill of lading", "Bill of entry (for imports)", "Foreign bank remittance advices (FIRC / eBRC)", "Letter of credit (if applicable)", "Customs duty payment challans", "GST refund claim (IGST on exports, if applicable)", "LUT / Bond (if exporting under LUT without paying IGST)", "Bank statement showing foreign currency receipts/payments"],
+      },
+    ];
+
+    for (const tpl of defaultTemplates) {
+      const [tplResult] = await db.insert(document_templates).values({
+        tenant_id: tenantId,
+        name: tpl.name,
+        description: tpl.description,
+        created_at: now,
+        updated_at: now,
+      }).$returningId();
+      await db.insert(template_items).values(
+        tpl.items.map((itemName, idx) => ({
+          template_id: tplResult.id,
+          name: itemName,
+          category: null,
+          is_required: true,
+          is_repeatable: false,
+          sort_order: idx,
+        }))
+      );
+    }
 
     // Get starter plan
     const [starterPlan] = await db.select({ id: plans.id }).from(plans).where(eq(plans.name, "Starter")).limit(1);

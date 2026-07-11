@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
 import { financial_years } from "@/lib/db/schema";
 import { getUserTenant } from "@/lib/db/helpers";
+import { logActivity } from "@/lib/activity";
 
 export const getFinancialYears = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -14,6 +15,7 @@ export const getFinancialYears = createServerFn({ method: "GET" })
     if (!tenantId) throw new Error("No firm found for your account");
 
     const db = getDb();
+
     const rows = await db
       .select()
       .from(financial_years)
@@ -54,6 +56,8 @@ export const createFinancialYear = createServerFn({ method: "POST" })
       created_at: now,
     });
 
+    await logActivity({ tenantId, userId, action: `Added financial year ${data.label}`, entityType: "financial_year", entityId: String((result as any).insertId) });
+
     return { id: (result as any).insertId as number };
   });
 
@@ -72,10 +76,15 @@ export const toggleFinancialYearActive = createServerFn({ method: "POST" })
 
     const db = getDb();
 
+    const newStatus = !data.isActive;
     await db
       .update(financial_years)
-      .set({ is_active: !data.isActive })
+      .set({ is_active: newStatus })
       .where(eq(financial_years.id, data.id));
+
+    // Fetch label for readable log
+    const [fy] = await db.select({ label: financial_years.label }).from(financial_years).where(eq(financial_years.id, data.id)).limit(1);
+    await logActivity({ tenantId, userId, action: `Marked financial year ${fy?.label ?? data.id} as ${newStatus ? "Active" : "Archived"}`, entityType: "financial_year", entityId: String(data.id) });
 
     return { ok: true };
   });

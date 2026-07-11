@@ -50,6 +50,8 @@ function TeamPage() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [role, setRole] = useState<"manager" | "staff">("staff");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const { data: team, isLoading } = useQuery({
     queryKey: ["team"],
@@ -157,6 +159,7 @@ function TeamPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12 text-center">#</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Base Role</TableHead>
@@ -167,15 +170,21 @@ function TeamPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                   Loading…
                 </TableCell>
               </TableRow>
             ) : (
-              (team?.members ?? []).map((m) => {
+              (() => {
+                const allMembers = team?.members ?? [];
+                const totalPages = Math.max(1, Math.ceil(allMembers.length / PAGE_SIZE));
+                const safePage = Math.min(page, totalPages);
+                const paginated = allMembers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+                return paginated.map((m, idx) => {
                 const isAdmin = m.baseRoles.includes("ca_admin");
                 return (
                   <TableRow key={m.userId}>
+                    <TableCell className="text-center text-sm text-muted-foreground">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
                     <TableCell className="font-medium">
                       {m.profile?.full_name || "—"}
                       {m.userId === user?.userId && (
@@ -226,11 +235,43 @@ function TeamPage() {
                     </TableCell>
                   </TableRow>
                 );
-              })
+              });
+              })()
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {(() => {
+        const allMembers = team?.members ?? [];
+        const totalPages = Math.max(1, Math.ceil(allMembers.length / PAGE_SIZE));
+        const safePage = Math.min(page, totalPages);
+        if (totalPages <= 1) return null;
+        return (
+          <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+            <span>Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, allMembers.length)} of {allMembers.length} members</span>
+            <span className="text-xs text-muted-foreground">Page {safePage} of {totalPages}</span>
+            <div className="flex items-center gap-1">
+              <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage === 1}>«</Button>
+              <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>‹</Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                  if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p, i) =>
+                  p === "..." ? <span key={`e-${i}`} className="px-2">…</span> :
+                  <Button key={p} variant={p === safePage ? "default" : "outline"} size="sm" onClick={() => setPage(p as number)} className="w-8">{p}</Button>
+                )}
+              <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>›</Button>
+              <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage === totalPages}>»</Button>
+            </div>
+          </div>
+        );
+      })()}
     </AppShell>
   );
 }

@@ -19,10 +19,9 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { StatusBadge, type DocStatus } from "@/components/StatusBadge";
+import { StatusBadge, DOC_STATUS_LABELS, type DocStatus } from "@/components/StatusBadge";
 import { ArrowLeft, Upload, Download, Trash2, MessageSquare, Plus, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -230,10 +229,11 @@ function RequestDetailPage() {
       </div>
 
       <div className="space-y-3">
-        {data.items.map((item) => (
+        {data.items.map((item, idx) => (
           <ItemRow
             key={item.id}
             item={item}
+            index={idx + 1}
             canReview={canReview}
             canDelete={canDelete}
             canUpload={!!canUpload}
@@ -278,9 +278,10 @@ interface CommentRow {
 }
 
 function ItemRow({
-  item, canReview, canDelete, canUpload, onUpload, onDownload, onDeleteFile, onRemove, onStatus, onOpenComments, active, comments, onAddComment,
+  item, index, canReview, canDelete, canUpload, onUpload, onDownload, onDeleteFile, onRemove, onStatus, onOpenComments, active, comments, onAddComment,
 }: {
   item: RequestItem;
+  index: number;
   canReview: boolean;
   canDelete: boolean;
   canUpload: boolean;
@@ -298,77 +299,83 @@ function ItemRow({
   const [comment, setComment] = useState("");
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="font-medium">{item.name}</p>
-              {item.category && <span className="text-xs text-muted-foreground">· {item.category}</span>}
-              {!item.is_required && <Badge variant="outline" className="text-xs">Optional</Badge>}
-              <StatusBadge status={item.status} />
-            </div>
-            {item.document_files.length > 0 && (
-              <ul className="mt-3 space-y-1">
-                {item.document_files.map((f) => (
-                  <li key={f.id} className="flex items-center gap-2 text-sm">
-                    <span className="truncate">{f.file_name}</span>
-                    <span className="text-xs text-muted-foreground">{(f.file_size / 1024).toFixed(1)} KB</span>
-                    <Button variant="ghost" size="icon" onClick={() => onDownload(f.storage_path, f.file_name)}><Download className="h-4 w-4" /></Button>
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => onDeleteFile(f.id, f.storage_path)}><Trash2 className="h-4 w-4 text-destructive" /></Button>}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {canUpload && (item.is_repeatable || item.document_files.length === 0) && (
-              <>
-                <input ref={fileInput} type="file" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
-                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-                  <Upload className="mr-2 h-4 w-4" /> Upload
-                </Button>
-              </>
-            )}
-            {canReview && (
-              <Select value={item.status} onValueChange={(v) => onStatus(v as DocStatus)}>
-                <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="uploaded">Uploaded</SelectItem>
-                  <SelectItem value="under_review">Under Review</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="reupload_required">Re-upload Needed</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-            <Button variant="ghost" size="icon" onClick={onOpenComments}><MessageSquare className="h-4 w-4" /></Button>
-            {canDelete && <Button variant="ghost" size="icon" onClick={onRemove}><Trash2 className="h-4 w-4 text-destructive" /></Button>}
-          </div>
+    <div className="rounded-lg border border-border bg-white">
+      {/* Main row */}
+      <div className="flex items-center gap-3 px-4 py-2.5">
+        {/* S.No */}
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">{index}</span>
+
+        {/* Name + category */}
+        <div className="min-w-0 flex-1">
+          <span className="text-sm font-medium">{item.name}</span>
+          {item.category && <span className="ml-1.5 text-xs text-muted-foreground">· {item.category}</span>}
+          {!item.is_required && <Badge variant="outline" className="ml-1.5 text-xs">Optional</Badge>}
         </div>
 
-        {active && (
-          <div className="mt-4 border-t border-border pt-4">
-            <ul className="space-y-2">
-              {comments.map((c) => (
-                <li key={c.id} className="rounded-md bg-muted p-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{c.authorName}</span>
-                    <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "d MMM, h:mm a")}</span>
-                  </div>
-                  <p className="mt-1 whitespace-pre-wrap">{c.body}</p>
-                </li>
-              ))}
-              {comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet.</p>}
-            </ul>
-            <div className="mt-2 flex gap-2">
-              <Input placeholder="Add a comment…" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { onAddComment(comment); setComment(""); } }} />
-              <Button size="sm" onClick={() => { onAddComment(comment); setComment(""); }}>Post</Button>
-            </div>
+        {/* Actions */}
+        <div className="flex shrink-0 items-center gap-1">
+          {canUpload && (item.is_repeatable || item.document_files.length === 0) && (
+            <>
+              <input ref={fileInput} type="file" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => fileInput.current?.click()}>
+                <Upload className="mr-1 h-3 w-3" /> Upload
+              </Button>
+            </>
+          )}
+          {canReview ? (
+            <Select value={item.status} onValueChange={(v) => onStatus(v as DocStatus)}>
+              <SelectTrigger className="h-auto w-auto border-0 p-0 shadow-none focus:ring-0 [&>svg]:ml-1">
+                <StatusBadge status={item.status} className="cursor-pointer" />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(DOC_STATUS_LABELS) as DocStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}><StatusBadge status={s} /></SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <StatusBadge status={item.status} />
+          )}
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onOpenComments}><MessageSquare className="h-3.5 w-3.5" /></Button>
+          {canDelete && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRemove}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>}
+        </div>
+      </div>
+
+      {/* Uploaded files — shown only when files exist */}
+      {item.document_files.length > 0 && (
+        <ul className="border-t border-border px-4 py-2 space-y-1">
+          {item.document_files.map((f) => (
+            <li key={f.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="truncate flex-1">{f.file_name}</span>
+              <span>{(f.file_size / 1024).toFixed(1)} KB</span>
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDownload(f.storage_path, f.file_name)}><Download className="h-3 w-3" /></Button>
+              {canDelete && <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDeleteFile(f.id, f.storage_path)}><Trash2 className="h-3 w-3 text-destructive" /></Button>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Comments panel — shown only when active */}
+      {active && (
+        <div className="border-t border-border px-4 py-3">
+          <ul className="space-y-1.5 mb-2">
+            {comments.map((c) => (
+              <li key={c.id} className="rounded-md bg-muted px-3 py-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-xs">{c.authorName}</span>
+                  <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "d MMM, h:mm a")}</span>
+                </div>
+                <p className="mt-0.5 whitespace-pre-wrap text-sm">{c.body}</p>
+              </li>
+            ))}
+            {comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet.</p>}
+          </ul>
+          <div className="flex gap-2">
+            <Input placeholder="Add a comment…" className="h-8 text-sm" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { onAddComment(comment); setComment(""); } }} />
+            <Button size="sm" className="h-8" onClick={() => { onAddComment(comment); setComment(""); }}>Post</Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }

@@ -54,6 +54,9 @@ function ClientsPage() {
   const doUpdateClient = useServerFn(updateClient);
   const doDeleteClient = useServerFn(deleteClient);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editTarget, setEditTarget] = useState<ClientRow | null>(null);
@@ -71,6 +74,10 @@ function ClientsPage() {
       .filter(Boolean)
       .some((v) => (v as string).toLowerCase().includes(q));
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -216,7 +223,7 @@ function ClientsPage() {
         <Input
           placeholder="Search by name, PAN, GST, mobile, email…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="pl-9"
         />
       </div>
@@ -225,6 +232,7 @@ function ClientsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12 text-center">#</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>PAN</TableHead>
               <TableHead>GSTIN</TableHead>
@@ -238,23 +246,24 @@ function ClientsPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                   Loading…
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                   {search ? "No clients match your search." : "No clients yet. Add your first client to get started."}
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((c) => (
+              paginated.map((c, idx) => (
                 <TableRow
                   key={c.id}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => navigate({ to: "/clients/$clientId", params: { clientId: String(c.id) } })}
                 >
+                  <TableCell className="text-center text-sm text-muted-foreground">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.pan ?? "—"}</TableCell>
                   <TableCell>{c.gstin ?? "—"}</TableCell>
@@ -298,6 +307,31 @@ function ClientsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+          <span>Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} clients</span>
+          <span className="text-xs text-muted-foreground">Page {safePage} of {totalPages}</span>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage === 1}>«</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>‹</Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === "..." ? <span key={`ellipsis-${i}`} className="px-2">…</span> :
+                <Button key={p} variant={p === safePage ? "default" : "outline"} size="sm" onClick={() => setPage(p as number)} className="w-8">{p}</Button>
+              )}
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>›</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage === totalPages}>»</Button>
+          </div>
+        </div>
+      )}
 
       {/* Edit client dialog */}
       <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>

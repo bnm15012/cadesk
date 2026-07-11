@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -32,6 +32,8 @@ function RequestsPage() {
   const doCreateRequest = useServerFn(createRequest);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [clientId, setClientId] = useState("");
   const [fyId, setFyId] = useState("");
   const [templateId, setTemplateId] = useState("");
@@ -49,6 +51,11 @@ function RequestsPage() {
     queryKey: ["requests"],
     queryFn: () => fetchRequests(),
   });
+
+  const allRequests = requests ?? [];
+  const totalPages = Math.max(1, Math.ceil(allRequests.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = allRequests.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const { data: opts } = useQuery({
     queryKey: ["request-opts"],
@@ -160,6 +167,7 @@ function RequestsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12 text-center">#</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>FY</TableHead>
@@ -168,36 +176,49 @@ function RequestsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(requests ?? []).map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell>
-                    <Link to="/requests/$requestId" params={{ requestId: String(r.id) }} className="font-medium text-primary hover:underline">
-                      {r.title}
-                    </Link>
-                  </TableCell>
+              {paginated.map((r, idx) => (
+                <TableRow key={r.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate({ to: "/requests/$requestId", params: { requestId: String(r.id) } })}>
+                  <TableCell className="text-center text-sm text-muted-foreground">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
+                  <TableCell className="font-medium">{r.title}</TableCell>
                   <TableCell>{r.clientName ?? "—"}</TableCell>
                   <TableCell>{r.fyLabel ?? "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{summary(r.request_items)}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        r.status === "completed"
-                          ? "bg-green-100 text-green-700 border-green-200"
-                          : r.status === "open"
-                          ? "bg-blue-100 text-blue-700 border-blue-200"
-                          : r.status === "archived"
-                          ? "bg-amber-100 text-amber-700 border-amber-200"
-                          : ""
-                      }
-                    >
-                      {r.status}
-                    </Badge>
+                    <Badge variant="outline" className={
+                      r.status === "completed" ? "bg-green-100 text-green-700 border-green-200" :
+                      r.status === "open"      ? "bg-blue-100 text-blue-700 border-blue-200" :
+                      r.status === "archived"  ? "bg-amber-100 text-amber-700 border-amber-200" : ""
+                    }>{r.status}</Badge>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+          <span>Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, allRequests.length)} of {allRequests.length} requests</span>
+          <span className="text-xs text-muted-foreground">Page {safePage} of {totalPages}</span>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage === 1}>«</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>‹</Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === "..." ? <span key={`e-${i}`} className="px-2">…</span> :
+                <Button key={p} variant={p === safePage ? "default" : "outline"} size="sm" onClick={() => setPage(p as number)} className="w-8">{p}</Button>
+              )}
+            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>›</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage === totalPages}>»</Button>
+          </div>
         </div>
       )}
     </AppShell>

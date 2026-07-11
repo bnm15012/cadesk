@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
 import { role_permissions, roles, user_custom_roles } from "@/lib/db/schema";
 import { getUserTenant } from "@/lib/db/helpers";
+import { logActivity } from "@/lib/activity";
 
 export const getRolesAndPermissions = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -64,6 +65,8 @@ export const createRole = createServerFn({ method: "POST" })
       created_at: now,
     });
 
+    await logActivity({ tenantId, userId, action: `Created role "${data.name}"`, entityType: "role", entityId: String((result as any).insertId) });
+
     return { id: (result as any).insertId as number };
   });
 
@@ -99,6 +102,10 @@ export const togglePermission = createServerFn({ method: "POST" })
       });
     }
 
+    // Fetch role name for readable log
+    const [role] = await db.select({ name: roles.name }).from(roles).where(eq(roles.id, data.roleId)).limit(1);
+    await logActivity({ tenantId, userId, action: `${data.has ? "Removed" : "Granted"} permission "${data.permission}" on role "${role?.name ?? data.roleId}"`, entityType: "role", entityId: String(data.roleId) });
+
     return { ok: true };
   });
 
@@ -121,6 +128,8 @@ export const deleteRole = createServerFn({ method: "POST" })
     await db.delete(role_permissions).where(eq(role_permissions.role_id, data.roleId));
     await db.delete(user_custom_roles).where(eq(user_custom_roles.role_id, data.roleId));
     await db.delete(roles).where(and(eq(roles.id, data.roleId), eq(roles.tenant_id, tenantId)));
+
+    await logActivity({ tenantId, userId, action: `Deleted role "${data.roleName}"`, entityType: "role", entityId: String(data.roleId) });
 
     return { ok: true };
   });
