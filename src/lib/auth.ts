@@ -89,15 +89,17 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
 
   const tenantId = profile?.tenantId ?? null;
 
-  // Load tenant status
+  // Load tenant name + status
   let tenantStatus: string | null = null;
+  let tenantName: string = "";
   if (tenantId) {
     const [t] = await getDb()
-      .select({ status: tenants.status })
+      .select({ status: tenants.status, name: tenants.name })
       .from(tenants)
       .where(eq(tenants.id, tenantId))
       .limit(1);
     tenantStatus = t?.status ?? null;
+    tenantName = t?.name ?? "";
   }
 
   // Load system roles
@@ -150,6 +152,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
     fullName: row.fullName,
     emailConfirmed: row.emailConfirmed,
     tenantId,
+    tenantName,
     tenantStatus,
     roles,
     permissions,

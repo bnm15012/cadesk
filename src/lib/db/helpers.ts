@@ -49,6 +49,16 @@ export async function hasPermission(
   permission: string
 ): Promise<boolean> {
   const db = getDb();
+
+  // ca_admin and super_admin have all permissions
+  const systemRoles = await db
+    .select({ role: user_roles.role })
+    .from(user_roles)
+    .where(eq(user_roles.user_id, userId));
+  if (systemRoles.some((r) => r.role === "ca_admin" || r.role === "super_admin")) {
+    return true;
+  }
+
   const customRoles = await db
     .select({ role_id: user_custom_roles.role_id })
     .from(user_custom_roles)

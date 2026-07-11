@@ -100,7 +100,7 @@ export const profiles = mysqlTable("profiles", {
 export const user_roles = mysqlTable("user_roles", {
   id: int("id").primaryKey().autoincrement(),
   user_id: varchar("user_id", { length: 36 }).notNull(), // Supabase auth user UUID
-  role: appRoleEnum.notNull(),
+  role: mysqlEnum("role", ["super_admin", "ca_admin", "manager", "staff", "client"]).notNull(),
   tenant_id: int("tenant_id").references(() => tenants.id),
 });
 

@@ -56,7 +56,7 @@ export function useCurrentUser() {
         email: session.email,
         fullName: session.fullName,
         tenantId: session.tenantId,
-        tenantName: "",
+        tenantName: session.tenantName ?? "",
         tenantStatus: session.tenantStatus ?? "active",
         roles: session.roles,
         permissions: session.permissions,

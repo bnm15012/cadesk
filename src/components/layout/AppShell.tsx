@@ -19,6 +19,7 @@ import {
   FileText,
   KeyRound,
   ChevronDown,
+  UserCircle,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { signOut } from "@/lib/auth";
@@ -144,15 +145,38 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ChevronDown className="h-4 w-4 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="font-normal">
-          <p className="text-sm font-medium truncate">{user?.fullName || user?.email}</p>
-          <p className="text-xs text-muted-foreground truncate">{user?.tenantName}</p>
+      <DropdownMenuContent align="end" className="w-64">
+        {/* Profile details */}
+        <div className="px-3 py-3 space-y-1">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              {(user?.fullName || user?.email || "?")[0].toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate">{user?.fullName || "—"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+          </div>
+          {user?.tenantName && (
+            <p className="text-xs text-muted-foreground pt-1">
+              Firm: <span className="font-medium text-foreground">{user.tenantName}</span>
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Role: <span className="font-medium text-foreground capitalize">
+              {user?.isCaAdmin ? "CA Admin" : user?.isClient ? "Client" : user?.roles?.[0] ?? "—"}
+            </span>
+          </p>
           {user?.isClient && (
             <Badge variant="outline" className="mt-1 text-xs">Client portal</Badge>
           )}
-        </DropdownMenuLabel>
+        </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/profile" className="flex items-center cursor-pointer">
+            <UserCircle className="mr-2 h-4 w-4" /> Profile
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setChangePassOpen(true)}>
           <KeyRound className="mr-2 h-4 w-4" /> Change password
         </DropdownMenuItem>

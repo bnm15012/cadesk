@@ -163,10 +163,6 @@ function ClientDetailPage() {
 
   return (
     <AppShell>
-      <Link to="/clients" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> All clients
-      </Link>
-
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold">{client.name}</h1>
@@ -178,6 +174,11 @@ function ClientDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/clients">
+              <ArrowLeft className="mr-2 h-4 w-4" /> All Clients
+            </Link>
+          </Button>
           {hasPerm(user, "clients.edit") && (
             <Button variant="outline" onClick={() => setEditOpen(true)}>
               <Pencil className="mr-2 h-4 w-4" /> Edit
