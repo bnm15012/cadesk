@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, CalendarRange } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/financial-years")({
-  head: () => ({ meta: [{ title: "Financial Years — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Financial Years — CA Vault" }] }),
   component: FinancialYearsPage,
 });
 

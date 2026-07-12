@@ -8,7 +8,7 @@ import { format } from "date-fns";
 import { History } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/activity")({
-  head: () => ({ meta: [{ title: "Activity Log — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Activity Log — CA Vault" }] }),
   component: ActivityPage,
 });
 

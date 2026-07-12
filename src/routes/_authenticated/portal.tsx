@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { FolderOpen, ChevronRight, CheckCircle2, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal")({
-  head: () => ({ meta: [{ title: "My Documents — CADesk" }] }),
+  head: () => ({ meta: [{ title: "My Documents — CA Vault" }] }),
   component: PortalPage,
 });
 

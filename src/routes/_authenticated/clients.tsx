@@ -31,7 +31,7 @@ import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteClient } from "@/lib/client-detail.functions";
 
 export const Route = createFileRoute("/_authenticated/clients")({
-  head: () => ({ meta: [{ title: "Clients — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Clients — CA Vault" }] }),
   component: ClientsPage,
 });
 

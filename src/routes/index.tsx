@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "CADesk — Client Document Collection for CA Firms" },
+      { title: "CA Vault — Client Document Collection for CA Firms" },
       {
         name: "description",
         content:
@@ -132,7 +132,7 @@ function DashboardIllustration() {
               <span className="flex h-6 w-6 items-center justify-center rounded bg-amber-400">
                 <FolderCheck className="h-3.5 w-3.5 text-white" />
               </span>
-              <span className="text-xs font-semibold text-white">CADesk</span>
+              <span className="text-xs font-semibold text-white">CA Vault</span>
             </div>
             {["Dashboard", "Clients", "Requests", "Templates", "Team", "Billing"].map((item, i) => (
               <div
@@ -219,7 +219,7 @@ function Landing() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400">
               <FolderCheck className="h-5 w-5 text-slate-900" />
             </span>
-            <span className="font-display text-xl font-semibold text-white">CADesk</span>
+            <span className="font-display text-xl font-semibold text-white">CA Vault</span>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10" onClick={openLogin}>
@@ -264,7 +264,7 @@ function Landing() {
                 <span className="text-amber-400"> clients</span> for<br className="hidden sm:block" /> documents.
               </h1>
               <p className="mt-5 max-w-lg text-lg text-blue-100/70">
-                CADesk gives your firm a secure portal where clients upload exactly what you
+                CA Vault gives your firm a secure portal where clients upload exactly what you
                 need — organized by financial year, reviewed by your team, tracked to the last version.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -461,7 +461,7 @@ function Landing() {
 
       {/* ── FOOTER ───────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-slate-900 py-8 text-center text-sm text-white/40">
-        © {new Date().getFullYear()} CADesk. Secure document collection for CA firms.
+        © {new Date().getFullYear()} CA Vault. Secure document collection for CA firms.
       </footer>
     </div>
   );

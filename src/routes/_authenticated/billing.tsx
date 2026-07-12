@@ -30,7 +30,7 @@ function loadRazorpayScript(): Promise<boolean> {
 }
 
 export const Route = createFileRoute("/_authenticated/billing")({
-  head: () => ({ meta: [{ title: "Billing — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Billing — CA Vault" }] }),
   component: BillingPage,
 });
 
@@ -85,7 +85,7 @@ function BillingPage() {
         key: result.keyId,
         amount: result.amount,
         currency: result.currency,
-        name: "CADesk",
+        name: "CA Vault",
         description: `${result.planName} plan (${billingPeriod})`,
         order_id: result.orderId,
         prefill: { email: user?.email ?? "" },

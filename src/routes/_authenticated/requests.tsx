@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, FolderOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/requests")({
-  head: () => ({ meta: [{ title: "Document Requests — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Document Requests — CA Vault" }] }),
   component: RequestsPage,
 });
 

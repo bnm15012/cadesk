@@ -29,7 +29,7 @@ import {
 import { Plus, Trash2, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/roles")({
-  head: () => ({ meta: [{ title: "Roles & Permissions — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Roles & Permissions — CA Vault" }] }),
   component: RolesPage,
 });
 

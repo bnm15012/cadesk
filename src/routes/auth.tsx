@@ -12,7 +12,7 @@ import { getSession } from "@/lib/auth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — CADesk" },
+      { title: "Sign in — CA Vault" },
       { name: "description", content: "Sign in to your CA firm workspace or register a new firm." },
     ],
   }),

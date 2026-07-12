@@ -122,7 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <FolderCheck className="h-4 w-4" />
       </span>
       <span className="font-display text-lg font-semibold text-sidebar-accent-foreground">
-        CADesk
+        CA Vault
       </span>
     </div>
   );
@@ -210,7 +210,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <FolderCheck className="h-4 w-4" />
           </span>
           <span className="font-display text-base font-semibold text-sidebar-accent-foreground">
-            CADesk
+            CA Vault
           </span>
         </div>
         {userDropdown}

@@ -300,7 +300,7 @@ export function AuthModal({ open, onOpenChange, defaultTab = "login" }: AuthModa
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400">
               <FolderCheck className="h-4 w-4 text-slate-900" />
             </span>
-            <span className="font-display text-lg font-semibold">CADesk</span>
+            <span className="font-display text-lg font-semibold">CA Vault</span>
           </div>
           {!showForgot && (
             <>

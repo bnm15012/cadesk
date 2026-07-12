@@ -26,7 +26,7 @@ import {
 import { ArrowLeft, Plus, Trash2, GripVertical, Pencil, Save, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/templates_/$templateId")({
-  head: () => ({ meta: [{ title: "Template — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Template — CA Vault" }] }),
   component: TemplateEditorPage,
 });
 

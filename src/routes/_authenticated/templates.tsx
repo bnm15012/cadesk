@@ -22,7 +22,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, FileStack, Search } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/templates")({
-  head: () => ({ meta: [{ title: "Templates — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Templates — CA Vault" }] }),
   component: TemplatesPage,
 });
 

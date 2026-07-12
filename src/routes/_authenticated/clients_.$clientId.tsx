@@ -38,7 +38,7 @@ const clientSchema = z.object({
 });
 
 export const Route = createFileRoute("/_authenticated/clients_/$clientId")({
-  head: () => ({ meta: [{ title: "Client — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Client — CA Vault" }] }),
   component: ClientDetailPage,
 });
 

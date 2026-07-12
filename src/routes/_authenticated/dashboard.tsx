@@ -11,7 +11,7 @@ import { Users, FolderOpen, CheckCircle2, Clock, UserCog, CreditCard, Upload, Fi
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — CADesk" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — CA Vault" }] }),
   component: DashboardPage,
 });
 
