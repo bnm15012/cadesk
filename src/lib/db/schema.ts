@@ -32,7 +32,7 @@ export const sessions = mysqlTable("sessions", {
 export const otps = mysqlTable("otps", {
   id:         int("id").primaryKey().autoincrement(),
   email:      varchar("email", { length: 255 }).notNull(),
-  code:       varchar("code", { length: 8 }).notNull(),
+  code:       varchar("code", { length: 255 }).notNull(),
   expires_at: datetime("expires_at").notNull(),
   used:       boolean("used").notNull().default(false),
   created_at: datetime("created_at").notNull().default(new Date("1970-01-01")),

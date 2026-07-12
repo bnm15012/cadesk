@@ -1,7 +1,7 @@
 CREATE TABLE `otps` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`email` varchar(255) NOT NULL,
-	`code` varchar(8) NOT NULL,
+	`code` varchar(255) NOT NULL,
 	`expires_at` datetime NOT NULL,
 	`used` boolean NOT NULL DEFAULT false,
 	`created_at` datetime NOT NULL DEFAULT '1970-01-01 00:00:00.000',
