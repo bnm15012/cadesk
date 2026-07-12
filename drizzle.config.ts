@@ -11,5 +11,6 @@ export default defineConfig({
     database: process.env.MYSQL_DATABASE ?? "clientfilehub",
     user: process.env.MYSQL_USER ?? "root",
     password: process.env.MYSQL_PASSWORD ?? "",
+    ssl: process.env.MYSQL_HOST?.includes("tidbcloud.com") ? { rejectUnauthorized: true } : undefined,
   },
 });

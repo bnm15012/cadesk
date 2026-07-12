@@ -18,7 +18,8 @@ function getMysqlConfig() {
     );
   }
 
-  return { host, port, database, user, password };
+  const ssl = host.includes("tidbcloud.com") ? { rejectUnauthorized: true } : undefined;
+  return { host, port, database, user, password, ssl };
 }
 
 // Singleton pool — reused across requests in the same process.
