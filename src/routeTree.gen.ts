@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
@@ -39,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/confirm',
+  path: '/confirm',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
   id: '/templates',
@@ -112,7 +118,7 @@ const AuthenticatedClientsClientIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/clients': typeof AuthenticatedClientsRoute
@@ -123,13 +129,14 @@ export interface FileRoutesByFullPath {
   '/roles': typeof AuthenticatedRolesRoute
   '/team': typeof AuthenticatedTeamRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/requests/$requestId': typeof AuthenticatedRequestsRequestIdRoute
   '/templates/$templateId': typeof AuthenticatedTemplatesTemplateIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/clients': typeof AuthenticatedClientsRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/roles': typeof AuthenticatedRolesRoute
   '/team': typeof AuthenticatedTeamRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/requests/$requestId': typeof AuthenticatedRequestsRequestIdRoute
   '/templates/$templateId': typeof AuthenticatedTemplatesTemplateIdRoute
@@ -148,7 +156,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/_authenticated/activity': typeof AuthenticatedActivityRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/_authenticated/clients_/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/_authenticated/requests_/$requestId': typeof AuthenticatedRequestsRequestIdRoute
   '/_authenticated/templates_/$templateId': typeof AuthenticatedTemplatesTemplateIdRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/team'
     | '/templates'
+    | '/auth/confirm'
     | '/clients/$clientId'
     | '/requests/$requestId'
     | '/templates/$templateId'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/team'
     | '/templates'
+    | '/auth/confirm'
     | '/clients/$clientId'
     | '/requests/$requestId'
     | '/templates/$templateId'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roles'
     | '/_authenticated/team'
     | '/_authenticated/templates'
+    | '/auth/confirm'
     | '/_authenticated/clients_/$clientId'
     | '/_authenticated/requests_/$requestId'
     | '/_authenticated/templates_/$templateId'
@@ -221,7 +233,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -246,6 +258,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_authenticated/templates': {
       id: '/_authenticated/templates'
@@ -376,10 +395,20 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthConfirmRoute: typeof AuthConfirmRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthConfirmRoute: AuthConfirmRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
