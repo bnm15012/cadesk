@@ -11,7 +11,7 @@ import { confirmEmail } from "@/lib/auth";
 import { Loader2, FolderCheck, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/auth/confirm")({
+export const Route = createFileRoute("/confirm")({
   validateSearch: (search: Record<string, unknown>) => ({
     token: typeof search.token === "string" ? search.token : "",
   }),

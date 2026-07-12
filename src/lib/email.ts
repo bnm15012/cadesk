@@ -49,7 +49,7 @@ export async function sendOtpEmail(email: string, code: string) {
 
 export async function sendConfirmationEmail(email: string, token: string, appUrl: string) {
   const transport = getTransport();
-  const link = `${appUrl}/auth/confirm?token=${token}`;
+  const link = `${appUrl}/confirm?token=${token}`;
   await transport.sendMail({
     from: FROM,
     to: email,
