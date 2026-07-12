@@ -380,6 +380,38 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
   return { ok: true };
 });
 
+// ── confirmEmail — verify the token from the confirmation email link ──────────
+export const confirmEmail = createServerFn({ method: "GET" })
+  .validator((d: { token: string }) => d)
+  .handler(async ({ data }) => {
+    const { getDb } = await import("@/lib/db");
+    const { users, otps } = await import("@/lib/db/schema");
+
+    const now = new Date();
+    const [otp] = await getDb()
+      .select()
+      .from(otps)
+      .where(and(eq(otps.code, data.token), eq(otps.used, false), gt(otps.expires_at, now)))
+      .limit(1);
+
+    if (!otp) throw new Error("This confirmation link is invalid or has expired.");
+
+    // Mark token as used
+    await getDb().update(otps).set({ used: true }).where(eq(otps.id, otp.id));
+
+    // Mark user as confirmed
+    await getDb().update(users).set({ email_confirmed: true }).where(eq(users.email, otp.email));
+
+    // Auto-login: create session
+    const [user] = await getDb().select({ id: users.id }).from(users).where(eq(users.email, otp.email)).limit(1);
+    if (!user) throw new Error("User not found.");
+
+    const session = await createSession(user.id);
+    setSessionCookie(session.id, session.expires);
+
+    return { ok: true };
+  });
+
 // ── sendOtp — for forgot password ─────────────────────────────────────────────
 export const sendOtp = createServerFn({ method: "POST" })
   .validator((d: { email: string }) => d)
