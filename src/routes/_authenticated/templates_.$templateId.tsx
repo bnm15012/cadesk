@@ -87,7 +87,10 @@ function TemplateEditorPage() {
 
   const addItem = async () => {
     const name = newItem.trim();
-    if (!name) return;
+    if (!name) {
+      toast.warning("Enter the item name before adding (e.g. Form 16, PAN copy, Bank statement).");
+      return;
+    }
     const nextSort = (templateData?.items.at(-1)?.sort_order ?? -1) + 1;
     try {
       await doAddItem({

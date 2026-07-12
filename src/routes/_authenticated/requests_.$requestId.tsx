@@ -96,7 +96,10 @@ function RequestDetailPage() {
   };
 
   const uploadFile = async (item: { id: number; name: string }, file: File) => {
-    if (!user?.tenantId) return;
+    if (!user?.tenantId) {
+      toast.error("Session error — please refresh and try again.");
+      return;
+    }
 
     const slug = (s: string) => s.trim().replace(/[^\w\-]/g, "_").replace(/_+/g, "_");
     const reqData = data?.request;
@@ -189,7 +192,10 @@ function RequestDetailPage() {
   };
 
   const handleAddComment = async (itemId: number, body: string) => {
-    if (!body.trim()) return;
+    if (!body.trim()) {
+      toast.warning("Write a comment before posting.");
+      return;
+    }
     try {
       await doAddComment({ data: { requestItemId: itemId, body: body.trim() } });
       qc.invalidateQueries({ queryKey: ["comments", itemId] });
@@ -445,8 +451,8 @@ function ItemRow({
             {comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet.</p>}
           </ul>
           <div className="flex gap-2">
-            <Input placeholder="Add a comment…" className="h-8 text-sm" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { onAddComment(comment); setComment(""); } }} />
-            <Button size="sm" className="h-8" onClick={() => { onAddComment(comment); setComment(""); }}>Post</Button>
+            <Input placeholder="Add a comment…" className="h-8 text-sm" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && comment.trim()) { onAddComment(comment); setComment(""); } else if (e.key === "Enter") { onAddComment(comment); } }} />
+            <Button size="sm" className="h-8" onClick={() => { if (comment.trim()) { onAddComment(comment); setComment(""); } else { onAddComment(comment); } }}>Post</Button>
           </div>
         </div>
       )}
