@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
-import { getUploadUrl, getDownloadUrl, deleteStorageFile } from "@/lib/storage";
+import { getUploadUrl, proxyUploadFile, getDownloadUrl, deleteStorageFile } from "@/lib/storage";
 import {
   getRequestDetail,
   getComments,
@@ -61,6 +61,7 @@ function RequestDetailPage() {
   const doReopenRequest = useServerFn(reopenRequest);
   const doAddComment = useServerFn(addComment);
   const fetchUploadUrl = useServerFn(getUploadUrl);
+  const doProxyUpload = useServerFn(proxyUploadFile);
   const fetchDownloadUrl = useServerFn(getDownloadUrl);
   const removeStorageFile = useServerFn(deleteStorageFile);
 
@@ -103,24 +104,39 @@ function RequestDetailPage() {
 
     const slug = (s: string) => s.trim().replace(/[^\w\-]/g, "_").replace(/_+/g, "_");
     const reqData = data?.request;
+    const firmFolder = `tenant_${user.tenantId}`;
     const clientName = slug(reqData?.clientName ?? `client_${reqData?.client_id ?? requestId}`);
     const fyLabel = slug(reqData?.fyLabel ?? "unknown_fy");
     const docName = slug(item.name);
     const fileName = file.name.replace(/[^\w.\-]/g, "_");
-    const storagePath = `${clientName}/${fyLabel}/${docName}/${Date.now()}_${fileName}`;
+    const storagePath = `${firmFolder}/${clientName}/${fyLabel}/${docName}/${Date.now()}_${fileName}`;
+    const contentType = file.type || "application/octet-stream";
 
     toast.loading("Uploading…", { id: "upload" });
     try {
-      const { url } = await fetchUploadUrl({
-        data: { storagePath, contentType: file.type || "application/octet-stream", contentLength: file.size },
-      });
+      // ── Attempt 1: presigned URL (direct browser → R2, fastest) ──────────
+      let uploaded = false;
+      try {
+        const { url } = await fetchUploadUrl({
+          data: { storagePath, contentType, contentLength: file.size },
+        });
+        const res = await fetch(url, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": contentType },
+        });
+        if (res.ok) uploaded = true;
+      } catch {
+        // Network error (VPN block etc.) — fall through to proxy
+      }
 
-      const uploadRes = await fetch(url, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-      });
-      if (!uploadRes.ok) throw new Error("Upload to storage failed");
+      // ── Attempt 2: server proxy (browser → server → R2) ──────────────────
+      if (!uploaded) {
+        toast.loading("Retrying via server…", { id: "upload" });
+        const arrayBuf = await file.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+        await doProxyUpload({ data: { storagePath, contentType, fileBase64: base64 } });
+      }
 
       await doInsertFile({
         data: {

@@ -1,24 +1,21 @@
 /**
  * Cloudflare R2 (S3-compatible) storage helpers.
  *
- * All operations are server-side only — the browser never gets direct access
- * to R2 credentials. Instead:
- *   1. Client requests a presigned upload URL from the server
- *   2. Client uploads directly to R2 using that URL (no server bandwidth used)
- *   3. Client requests a presigned download URL to view/download a file
- *   4. Delete is done server-side only
+ * Upload strategy — two paths, tried in order:
+ *   1. Presigned URL: browser PUTs directly to R2 (no server bandwidth used)
+ *   2. Server proxy:  browser POSTs file to this server, server streams to R2
+ *      (fallback when VPN/firewall blocks direct R2 connections)
  *
  * Required env vars (server-side only, no VITE_ prefix):
- *   R2_ACCOUNT_ID      — Cloudflare account ID
- *   R2_ACCESS_KEY_ID   — R2 API token access key
+ *   R2_ACCOUNT_ID        — Cloudflare account ID
+ *   R2_ACCESS_KEY_ID     — R2 API token access key
  *   R2_SECRET_ACCESS_KEY — R2 API token secret
- *   R2_BUCKET_NAME     — bucket name (e.g. "cadesk-documents")
- *   R2_PUBLIC_URL      — optional public bucket URL (if bucket is public)
+ *   R2_BUCKET_NAME       — bucket name (e.g. "cavault")
+ *   R2_PUBLIC_URL        — optional public bucket URL (if bucket is public)
  */
 import { createServerFn } from "@tanstack/react-start";
-import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { requireAuth } from "@/lib/auth-middleware";
 
 function getS3() {
@@ -47,9 +44,9 @@ function getBucket() {
 export const getUploadUrl = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .validator((d: {
-    storagePath: string;   // e.g. "42/7/3/1720000000000_pan.pdf"
-    contentType: string;   // e.g. "application/pdf"
-    contentLength: number; // file size in bytes
+    storagePath: string;
+    contentType: string;
+    contentLength: number;
   }) => d)
   .handler(async ({ data }) => {
     const s3 = getS3();
@@ -70,6 +67,38 @@ export const getUploadUrl = createServerFn({ method: "POST" })
     // Presigned URL valid for 5 minutes
     const url = await getSignedUrl(s3, command, { expiresIn: 300 });
     return { url, storagePath: data.storagePath };
+  });
+
+// ── Proxy upload: browser sends file to this server, server streams to R2 ─────
+// Used as fallback when VPN/firewall blocks direct browser→R2 connections.
+export const proxyUploadFile = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((d: {
+    storagePath: string;
+    contentType: string;
+    fileBase64: string; // base64-encoded file bytes
+  }) => d)
+  .handler(async ({ data }) => {
+    const s3 = getS3();
+    const bucket = getBucket();
+
+    // Decode base64 → Buffer
+    const buffer = Buffer.from(data.fileBase64, "base64");
+
+    // Max file size 50 MB
+    if (buffer.byteLength > 50 * 1024 * 1024) {
+      throw new Error("File too large. Maximum size is 50 MB.");
+    }
+
+    await s3.send(new PutObjectCommand({
+      Bucket: bucket,
+      Key: data.storagePath,
+      ContentType: data.contentType,
+      ContentLength: buffer.byteLength,
+      Body: buffer,
+    }));
+
+    return { storagePath: data.storagePath };
   });
 
 // ── Get a presigned URL to download / view a file ────────────────────────────
