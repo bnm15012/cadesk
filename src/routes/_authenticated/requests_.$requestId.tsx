@@ -117,6 +117,17 @@ function RequestDetailPage() {
     const storagePath = `${firmFolder}/${clientName}/${fyLabel}/${docName}/${Date.now()}_${fileName}`;
     const contentType = file.type || "application/octet-stream";
 
+    // If client is re-uploading a non-repeatable item, silently delete previous file(s)
+    const itemData = data?.items.find((i) => i.id === item.id);
+    if (user.isClient && itemData && !itemData.is_repeatable && itemData.document_files.length > 0) {
+      await Promise.allSettled(
+        itemData.document_files.map(async (f) => {
+          await removeStorageFile({ data: { storagePath: f.storage_path } }).catch(() => {});
+          await doDeleteFile({ data: { fileId: f.id } }).catch(() => {});
+        })
+      );
+    }
+
     // Use a unique toast id per file so multiple uploads don't clobber each other
     const toastId = `upload-${Date.now()}-${Math.random()}`;
     toast.loading(`Uploading ${file.name}…`, { id: toastId });
