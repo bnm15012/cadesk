@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
 import { getRequests, getRequestOpts, createRequest } from "@/lib/requests.functions";
+import { deleteRequest } from "@/lib/request-detail.functions";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, FolderOpen, Search } from "lucide-react";
+import { Plus, FolderOpen, Search, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/requests")({
   head: () => ({ meta: [{ title: "Document Requests — CA Vault" }] }),
@@ -30,6 +31,7 @@ function RequestsPage() {
   const fetchRequests = useServerFn(getRequests);
   const fetchOpts = useServerFn(getRequestOpts);
   const doCreateRequest = useServerFn(createRequest);
+  const doDeleteRequest = useServerFn(deleteRequest);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
@@ -101,6 +103,18 @@ function RequestsPage() {
     } catch (err) {
       setBusy(false);
       toast.error(err instanceof Error ? err.message : "Failed to create request");
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, requestId: number, title: string) => {
+    e.stopPropagation();
+    if (!confirm(`Delete "${title}" and all its documents? This cannot be undone.`)) return;
+    try {
+      await doDeleteRequest({ data: { requestId } });
+      toast.success("Request deleted");
+      qc.invalidateQueries({ queryKey: ["requests"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete request");
     }
   };
 
@@ -225,6 +239,7 @@ function RequestsPage() {
                 <TableHead>FY</TableHead>
                 <TableHead>Progress</TableHead>
                 <TableHead>Status</TableHead>
+                {hasPerm(user, "documents.request") && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -242,6 +257,18 @@ function RequestsPage() {
                       r.status === "archived"  ? "bg-amber-100 text-amber-700 border-amber-200" : ""
                     }>{r.status}</Badge>
                   </TableCell>
+                  {hasPerm(user, "documents.request") && (
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
+                        onClick={(e) => handleDelete(e, r.id, r.title)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
