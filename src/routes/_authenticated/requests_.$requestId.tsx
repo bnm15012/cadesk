@@ -112,7 +112,9 @@ function RequestDetailPage() {
     const storagePath = `${firmFolder}/${clientName}/${fyLabel}/${docName}/${Date.now()}_${fileName}`;
     const contentType = file.type || "application/octet-stream";
 
-    toast.loading("Uploading…", { id: "upload" });
+    // Use a unique toast id per file so multiple uploads don't clobber each other
+    const toastId = `upload-${Date.now()}-${Math.random()}`;
+    toast.loading(`Uploading ${file.name}…`, { id: toastId });
     try {
       // ── Attempt 1: presigned URL (direct browser → R2, fastest) ──────────
       let uploaded = false;
@@ -137,9 +139,8 @@ function RequestDetailPage() {
 
       // ── Attempt 2: server proxy (browser → server → R2) ──────────────────
       if (!uploaded) {
-        toast.loading("Retrying via server…", { id: "upload" });
+        toast.loading(`Retrying ${file.name} via server…`, { id: toastId });
         const arrayBuf = await file.arrayBuffer();
-        // Use FileReader-style chunked base64 to avoid stack overflow on large files
         const bytes = new Uint8Array(arrayBuf);
         const chunkSize = 8192;
         let binary = "";
@@ -161,10 +162,10 @@ function RequestDetailPage() {
         },
       });
 
-      toast.success("File uploaded", { id: "upload" });
+      toast.success(`${file.name} uploaded`, { id: toastId });
       invalidate();
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed", { id: "upload" });
+      toast.error(`${file.name}: ${err.message ?? "Upload failed"}`, { id: toastId });
     }
   };
 
@@ -424,7 +425,17 @@ function ItemRow({
         <div className="flex shrink-0 items-center gap-1">
           {canUpload && (item.is_repeatable || item.document_files.length === 0) && (
             <>
-              <input ref={fileInput} type="file" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
+              <input
+                ref={fileInput}
+                type="file"
+                className="hidden"
+                multiple={item.is_repeatable}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  files.forEach((f) => onUpload(f));
+                  e.target.value = "";
+                }}
+              />
               <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => fileInput.current?.click()}>
                 <Upload className="mr-1 h-3 w-3" /> Upload
               </Button>
