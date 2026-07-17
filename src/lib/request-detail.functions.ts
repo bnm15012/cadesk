@@ -420,3 +420,34 @@ export const addComment = createServerFn({ method: "POST" })
 
     return { id: (result as any).insertId as number };
   });
+
+// ── Delete an entire document request (and all its items, files, comments) ────
+export const deleteRequest = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .validator((input: unknown) => z.object({ requestId: z.number().int().positive() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const tenantId = await getUserTenant(userId);
+    if (!tenantId) throw new Error("No firm found for your account");
+
+    const db = getDb();
+
+    const items = await db
+      .select({ id: request_items.id })
+      .from(request_items)
+      .where(and(eq(request_items.request_id, data.requestId), eq(request_items.tenant_id, tenantId)));
+
+    const itemIds = items.map((i) => i.id);
+
+    if (itemIds.length > 0) {
+      await db.delete(document_comments).where(inArray(document_comments.request_item_id, itemIds));
+      await db.delete(document_files).where(inArray(document_files.request_item_id, itemIds));
+      await db.delete(request_items).where(inArray(request_items.id, itemIds));
+    }
+
+    await db
+      .delete(document_requests)
+      .where(and(eq(document_requests.id, data.requestId), eq(document_requests.tenant_id, tenantId)));
+
+    return { ok: true };
+  });

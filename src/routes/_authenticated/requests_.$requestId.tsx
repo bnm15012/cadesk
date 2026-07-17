@@ -16,6 +16,7 @@ import {
   markRequestCompleted,
   reopenRequest,
   addComment,
+  deleteRequest,
 } from "@/lib/request-detail.functions";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ function RequestDetailPage() {
   const doProxyUpload = useServerFn(proxyUploadFile);
   const fetchDownloadUrl = useServerFn(getDownloadUrl);
   const removeStorageFile = useServerFn(deleteStorageFile);
+  const doDeleteRequest = useServerFn(deleteRequest);
 
   const { data, isLoading } = useQuery({
     queryKey: ["request", requestId],
@@ -236,6 +238,17 @@ function RequestDetailPage() {
     }
   };
 
+  const handleDeleteRequest = async () => {
+    if (!confirm("Delete this entire request and all its documents? This cannot be undone.")) return;
+    try {
+      await doDeleteRequest({ data: { requestId } });
+      toast.success("Request deleted");
+      navigate({ to: "/requests" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete request");
+    }
+  };
+
   const markCompleted = async () => {
     try {
       await doMarkCompleted({ data: { requestId } });
@@ -323,6 +336,11 @@ function RequestDetailPage() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          )}
+          {canReview && (
+            <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700" onClick={handleDeleteRequest}>
+              <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+            </Button>
           )}
         </div>
       </div>
