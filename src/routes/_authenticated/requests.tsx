@@ -239,7 +239,7 @@ function RequestsPage() {
                 <TableHead>FY</TableHead>
                 <TableHead>Progress</TableHead>
                 <TableHead>Status</TableHead>
-                {hasPerm(user, "documents.request") && <TableHead className="w-10" />}
+                {hasPerm(user, "documents.request") && <TableHead className="w-16">Delete</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
