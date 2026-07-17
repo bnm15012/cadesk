@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     firmNav.push({ to: "/clients", label: "Clients", icon: Users });
     firmNav.push({ to: "/requests", label: "Document Requests", short: "Requests", icon: FolderOpen });
     firmNav.push({ to: "/templates", label: "Templates", icon: FileStack });
-    firmNav.push({ to: "/financial-years", label: "Financial Years", short: "FY", icon: CalendarRange });
+    // Financial Years are auto-managed — screen hidden from nav
     firmNav.push({ to: "/team", label: "Team", icon: UserCog });
     if (hasPerm(user, "settings.edit")) {
       firmNav.push({ to: "/roles", label: "Roles & Permissions", short: "Roles", icon: ShieldCheck });

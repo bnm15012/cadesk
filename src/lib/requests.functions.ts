@@ -85,7 +85,7 @@ export const getRequestOpts = createServerFn({ method: "GET" })
       db
         .select({ id: financial_years.id, label: financial_years.label })
         .from(financial_years)
-        .where(and(eq(financial_years.tenant_id, tenantId), eq(financial_years.is_active, true)))
+        .where(eq(financial_years.tenant_id, tenantId))
         .orderBy(desc(financial_years.label)),
       db
         .select({ id: document_templates.id, name: document_templates.name })
@@ -95,6 +95,45 @@ export const getRequestOpts = createServerFn({ method: "GET" })
         .select()
         .from(template_items),
     ]);
+
+    // Auto-ensure last 5 Indian FY years exist for this tenant
+    // Indian FY: Apr 1 – Mar 31. Label format: "FY 24-25"
+    const currentYear = new Date().getMonth() >= 3
+      ? new Date().getFullYear()   // Apr–Dec: current year started new FY
+      : new Date().getFullYear() - 1; // Jan–Mar: still in previous FY
+
+    const neededLabels: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const startYear = currentYear - i;
+      const endYear = startYear + 1;
+      neededLabels.push(`FY ${String(startYear).slice(2)}-${String(endYear).slice(2)}`);
+    }
+
+    const existingLabels = new Set(fyRows.map((f) => f.label));
+    const missing = neededLabels.filter((l) => !existingLabels.has(l));
+
+    if (missing.length > 0) {
+      await db.insert(financial_years).values(
+        missing.map((label) => {
+          const startYear = 2000 + parseInt(label.slice(3, 5));
+          return {
+            label,
+            start_date: new Date(`${startYear}-04-01`),
+            end_date: new Date(`${startYear + 1}-03-31`),
+            is_active: false,
+            tenant_id: tenantId,
+            created_at: new Date(),
+          };
+        })
+      );
+      // Re-fetch after inserting
+      const newFyRows = await db
+        .select({ id: financial_years.id, label: financial_years.label })
+        .from(financial_years)
+        .where(eq(financial_years.tenant_id, tenantId))
+        .orderBy(desc(financial_years.label));
+      fyRows.splice(0, fyRows.length, ...newFyRows);
+    }
 
     // Filter items to only those belonging to this tenant's templates
     const tplIds = new Set(tplRows.map((t) => t.id));
