@@ -20,6 +20,7 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -42,6 +43,7 @@ function RequestDetailPage() {
   const { data: user } = useCurrentUser();
   const qc = useQueryClient();
   const [newItemName, setNewItemName] = useState("");
+  const [newItemRepeatable, setNewItemRepeatable] = useState(false);
   const [showItemHint, setShowItemHint] = useState(false);
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
 
@@ -87,9 +89,10 @@ function RequestDetailPage() {
     const nextSort = (data?.items.at(-1)?.sort_order ?? -1) + 1;
     try {
       await doAddItem({
-        data: { requestId, name: newItemName.trim(), sortOrder: nextSort },
+        data: { requestId, name: newItemName.trim(), sortOrder: nextSort, isRepeatable: newItemRepeatable },
       });
       setNewItemName("");
+      setNewItemRepeatable(false);
       invalidate();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add item");
@@ -356,6 +359,10 @@ function RequestDetailPage() {
               onKeyDown={(e) => e.key === "Enter" && addItem()}
               className={showItemHint ? "border-amber-400 focus-visible:ring-amber-400" : ""}
             />
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+              <Checkbox checked={newItemRepeatable} onCheckedChange={(v) => setNewItemRepeatable(!!v)} />
+              Multi-file
+            </label>
             <Button onClick={addItem}><Plus className="mr-2 h-4 w-4" /> Add</Button>
           </div>
           {showItemHint && (

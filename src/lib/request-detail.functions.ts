@@ -159,6 +159,7 @@ const addItemSchema = z.object({
   requestId: z.number().int().positive(),
   name: z.string().trim().min(1),
   sortOrder: z.number().int(),
+  isRepeatable: z.boolean().optional(),
 });
 
 export const addRequestItem = createServerFn({ method: "POST" })
@@ -178,7 +179,7 @@ export const addRequestItem = createServerFn({ method: "POST" })
       name: data.name,
       sort_order: data.sortOrder,
       is_required: true,
-      is_repeatable: false,
+      is_repeatable: data.isRepeatable ?? false,
       status: "pending",
       created_at: now,
       updated_at: now,
