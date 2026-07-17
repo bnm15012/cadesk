@@ -155,6 +155,10 @@ function TeamPage() {
         )}
       </div>
 
+      <div className="mb-4 rounded-lg border border-border bg-white px-4 py-3 text-sm text-foreground">
+        <strong>How permissions work:</strong> Base role (Manager/Staff) is just a label. Actual permissions come from <span className="font-semibold text-red-600">Custom Roles</span> defined in <a href="/roles" className="font-semibold text-red-600 underline">Roles &amp; Permissions</a>. Assign custom roles to members by clicking the badges below. <span className="font-semibold text-red-600">Firm Admins always have full access.</span>
+      </div>
+
       <div className="rounded-lg border border-border bg-white">
         <Table>
           <TableHeader>
