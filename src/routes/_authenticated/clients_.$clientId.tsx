@@ -26,7 +26,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ArrowLeft, KeyRound, Pencil, UserPlus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowLeft, KeyRound, Pencil, UserPlus, Search } from "lucide-react";
 import { format } from "date-fns";
 
 const clientSchema = z.object({
@@ -57,6 +59,8 @@ function ClientDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [reqSearch, setReqSearch] = useState("");
+  const [reqStatus, setReqStatus] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["client", clientId],
@@ -251,39 +255,66 @@ function ClientDetailPage() {
           </CardHeader>
           <CardContent>
             {data?.requests.length ? (
-              <ul className="divide-y divide-border">
-                {data.requests.map((r) => (
-                  <li key={r.id} className="py-3">
-                    <Link
-                      to="/requests/$requestId"
-                      params={{ requestId: String(r.id) }}
-                      className="flex items-center justify-between gap-4 hover:text-primary"
-                    >
-                      <div>
-                        <p className="font-medium">{r.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {r.fyLabel} ·{" "}
-                          {format(new Date(r.created_at), "d MMM yyyy")}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={
-                          r.status === "completed"
-                            ? "bg-green-100 text-green-700 border-green-200"
-                            : r.status === "open"
-                            ? "bg-blue-100 text-blue-700 border-blue-200"
-                            : r.status === "archived"
-                            ? "bg-amber-100 text-amber-700 border-amber-200"
-                            : ""
-                        }
-                      >
-                        {r.status}
-                      </Badge>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <>
+                {/* Search + status filter */}
+                <div className="mb-3 flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by title or FY…"
+                      value={reqSearch}
+                      onChange={(e) => setReqSearch(e.target.value)}
+                      className="pl-8 h-8 text-sm"
+                    />
+                  </div>
+                  <Select value={reqStatus} onValueChange={(v) => setReqStatus(v === "_all" ? "" : v)}>
+                    <SelectTrigger className="w-32 h-8 text-sm"><SelectValue placeholder="All statuses" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_all">All</SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {(() => {
+                  const filtered = data.requests.filter((r) => {
+                    const q = reqSearch.toLowerCase();
+                    return (!q || r.title.toLowerCase().includes(q) || (r.fyLabel ?? "").toLowerCase().includes(q))
+                      && (!reqStatus || r.status === reqStatus);
+                  });
+                  return filtered.length ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>FY</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filtered.map((r) => (
+                          <TableRow key={r.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate({ to: "/requests/$requestId", params: { requestId: String(r.id) } })}>
+                            <TableCell className="font-medium">{r.title}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{r.fyLabel ?? "—"}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{format(new Date(r.created_at), "d MMM yyyy")}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={
+                                r.status === "completed" ? "bg-green-100 text-green-700 border-green-200" :
+                                r.status === "open"      ? "bg-blue-100 text-blue-700 border-blue-200" :
+                                r.status === "archived"  ? "bg-amber-100 text-amber-700 border-amber-200" : ""
+                              }>{r.status}</Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="py-4 text-sm text-muted-foreground text-center">No matching requests.</p>
+                  );
+                })()}
+              </>
             ) : (
               <p className="py-4 text-sm text-muted-foreground">No document requests yet.</p>
             )}
