@@ -31,6 +31,7 @@ function getS3() {
     region: "auto",
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId, secretAccessKey },
+    forcePathStyle: true,
   });
 }
 
@@ -52,7 +53,6 @@ export const getUploadUrl = createServerFn({ method: "POST" })
     const s3 = getS3();
     const bucket = getBucket();
 
-    // Max file size 50 MB
     if (data.contentLength > 50 * 1024 * 1024) {
       throw new Error("File too large. Maximum size is 50 MB.");
     }
@@ -76,16 +76,14 @@ export const proxyUploadFile = createServerFn({ method: "POST" })
   .validator((d: {
     storagePath: string;
     contentType: string;
-    fileBase64: string; // base64-encoded file bytes
+    fileBase64: string;
   }) => d)
   .handler(async ({ data }) => {
     const s3 = getS3();
     const bucket = getBucket();
 
-    // Decode base64 → Buffer
     const buffer = Buffer.from(data.fileBase64, "base64");
 
-    // Max file size 50 MB
     if (buffer.byteLength > 50 * 1024 * 1024) {
       throw new Error("File too large. Maximum size is 50 MB.");
     }

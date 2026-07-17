@@ -125,16 +125,28 @@ function RequestDetailPage() {
           body: file,
           headers: { "Content-Type": contentType },
         });
-        if (res.ok) uploaded = true;
-      } catch {
-        // Network error (VPN block etc.) — fall through to proxy
+        if (res.ok) {
+          uploaded = true;
+        } else {
+          console.warn("Presigned upload failed:", res.status, res.statusText);
+        }
+      } catch (e) {
+        // Network error (VPN/CORS block etc.) — fall through to proxy
+        console.warn("Presigned upload error, falling back to proxy:", e);
       }
 
       // ── Attempt 2: server proxy (browser → server → R2) ──────────────────
       if (!uploaded) {
         toast.loading("Retrying via server…", { id: "upload" });
         const arrayBuf = await file.arrayBuffer();
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+        // Use FileReader-style chunked base64 to avoid stack overflow on large files
+        const bytes = new Uint8Array(arrayBuf);
+        const chunkSize = 8192;
+        let binary = "";
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        }
+        const base64 = btoa(binary);
         await doProxyUpload({ data: { storagePath, contentType, fileBase64: base64 } });
       }
 
