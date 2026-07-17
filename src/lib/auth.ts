@@ -255,21 +255,43 @@ export const signUp = createServerFn({ method: "POST" })
     ]);
 
     // Seed 3 common starter templates — CA can add more as needed
-    const defaultTemplates: Array<{ name: string; description: string; items: string[] }> = [
+    const defaultTemplates: Array<{ name: string; description: string; items: Array<{ name: string; is_repeatable: boolean }> }> = [
       {
         name: "ITR — Salaried Individual",
         description: "Checklist for salaried income tax return",
-        items: ["Form 16 (from employer)", "Bank statements (all accounts)", "Investment proofs (80C — LIC, PPF, ELSS, etc.)", "Home loan interest certificate (if applicable)", "Rent receipts / Rental agreement (HRA, if applicable)", "Aadhaar copy", "PAN copy"],
+        items: [
+          { name: "Form 16 (from employer)", is_repeatable: false },
+          { name: "Bank statements (all accounts)", is_repeatable: true },
+          { name: "Investment proofs (80C — LIC, PPF, ELSS, etc.)", is_repeatable: true },
+          { name: "Home loan interest certificate (if applicable)", is_repeatable: false },
+          { name: "Rent receipts / Rental agreement (HRA, if applicable)", is_repeatable: true },
+          { name: "Aadhaar copy", is_repeatable: false },
+          { name: "PAN copy", is_repeatable: false },
+        ],
       },
       {
         name: "GST Monthly Return",
         description: "Documents for monthly GSTR-1 and GSTR-3B filing",
-        items: ["Sales invoices", "Purchase invoices", "Credit / Debit notes", "Bank statement for the month", "Expense bills"],
+        items: [
+          { name: "Sales invoices", is_repeatable: true },
+          { name: "Purchase invoices", is_repeatable: true },
+          { name: "Credit / Debit notes", is_repeatable: true },
+          { name: "Bank statement for the month", is_repeatable: true },
+          { name: "Expense bills", is_repeatable: true },
+        ],
       },
       {
         name: "Company Audit",
         description: "Statutory audit checklist for private limited company",
-        items: ["Bank statements (all accounts, full year)", "Trial balance", "Ledger extracts", "Fixed asset register", "Loan agreements", "Statutory dues challans (PF, ESI, TDS, GST)", "Board minutes / resolutions"],
+        items: [
+          { name: "Bank statements (all accounts, full year)", is_repeatable: true },
+          { name: "Trial balance", is_repeatable: false },
+          { name: "Ledger extracts", is_repeatable: true },
+          { name: "Fixed asset register", is_repeatable: false },
+          { name: "Loan agreements", is_repeatable: true },
+          { name: "Statutory dues challans (PF, ESI, TDS, GST)", is_repeatable: true },
+          { name: "Board minutes / resolutions", is_repeatable: true },
+        ],
       },
     ];
 
@@ -282,12 +304,12 @@ export const signUp = createServerFn({ method: "POST" })
         updated_at: now,
       }).$returningId();
       await db.insert(template_items).values(
-        tpl.items.map((itemName, idx) => ({
+        tpl.items.map((item, idx) => ({
           template_id: tplResult.id,
-          name: itemName,
+          name: item.name,
           category: null,
           is_required: true,
-          is_repeatable: false,
+          is_repeatable: item.is_repeatable,
           sort_order: idx,
         }))
       );

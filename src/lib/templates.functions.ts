@@ -36,7 +36,10 @@ export const getTemplates = createServerFn({ method: "GET" })
 const createTemplateSchema = z.object({
   name: z.string().trim().min(1).max(255),
   description: z.string().trim().optional().nullable(),
-  items: z.array(z.string()).optional(),
+  items: z.array(z.union([
+    z.string(),
+    z.object({ name: z.string(), is_repeatable: z.boolean().optional() }),
+  ])).optional(),
 });
 
 export const createTemplate = createServerFn({ method: "POST" })
@@ -62,12 +65,12 @@ export const createTemplate = createServerFn({ method: "POST" })
 
     if (data.items && data.items.length > 0) {
       await db.insert(template_items).values(
-        data.items.map((name, idx) => ({
+        data.items.map((item, idx) => ({
           template_id: templateId,
-          name,
+          name: typeof item === "string" ? item : item.name,
           sort_order: idx,
           is_required: true,
-          is_repeatable: false,
+          is_repeatable: typeof item === "string" ? false : (item.is_repeatable ?? false),
         }))
       );
     }
