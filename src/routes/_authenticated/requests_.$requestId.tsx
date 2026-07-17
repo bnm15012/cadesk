@@ -104,7 +104,7 @@ function RequestDetailPage() {
 
     const slug = (s: string) => s.trim().replace(/[^\w\-]/g, "_").replace(/_+/g, "_");
     const reqData = data?.request;
-    const firmFolder = `tenant_${user.tenantId}`;
+    const firmFolder = slug(user.tenantName || `tenant_${user.tenantId}`);
     const clientName = slug(reqData?.clientName ?? `client_${reqData?.client_id ?? requestId}`);
     const fyLabel = slug(reqData?.fyLabel ?? "unknown_fy");
     const docName = slug(item.name);
