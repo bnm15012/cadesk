@@ -123,7 +123,7 @@ export async function checkPlanLimit(
 ): Promise<void> {
   const db = getDb();
 
-  // Get latest active/trial subscription + plan limits
+  // Get latest subscription + plan limits
   const [sub] = await db
     .select({
       plan_name: plans.name,
@@ -131,6 +131,7 @@ export async function checkPlanLimit(
       max_staff: plans.max_staff,
       max_templates: plans.max_templates,
       status: subscriptions.status,
+      current_period_end: subscriptions.current_period_end,
     })
     .from(subscriptions)
     .leftJoin(plans, eq(subscriptions.plan_id, plans.id))
@@ -141,8 +142,13 @@ export async function checkPlanLimit(
   // No subscription at all → allow (e.g. super_admin seeding)
   if (!sub) return;
 
-  // Subscription exists but is expired/cancelled → block all new additions
-  if (sub.status === "expired" || sub.status === "cancelled") {
+  // Treat as expired if: status is expired/cancelled OR period_end has passed
+  const isExpired =
+    sub.status === "expired" ||
+    sub.status === "cancelled" ||
+    (sub.current_period_end !== null && new Date(sub.current_period_end) < new Date());
+
+  if (isExpired) {
     throw new Error(
       "Your plan has expired. Please renew from the Billing page to continue adding records."
     );

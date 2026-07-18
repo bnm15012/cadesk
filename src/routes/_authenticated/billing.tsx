@@ -75,6 +75,14 @@ function BillingPage() {
     ? Math.max(0, Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / 86400000))
     : null;
 
+  // Treat as expired if period_end has passed, regardless of status in DB
+  const isEffectivelyExpired =
+    sub &&
+    (sub.status === "expired" ||
+      sub.status === "cancelled" ||
+      (sub.current_period_end !== null &&
+        new Date(sub.current_period_end) < new Date()));
+
   async function choosePlan(p: PlanRow) {
     setPayingPlanId(p.id);
     try {
@@ -146,18 +154,19 @@ function BillingPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {sub.status === "trial" && trialDaysLeft !== null && (
+                {sub.status === "trial" && !isEffectivelyExpired && trialDaysLeft !== null && (
                   <span className="text-sm text-muted-foreground">{trialDaysLeft} days left in trial</span>
                 )}
                 <Badge
                   variant="outline"
                   className={
+                    isEffectivelyExpired      ? "bg-red-50 text-red-700 border-red-200" :
                     sub.status === "active"   ? "bg-green-50 text-green-700 border-green-200" :
                     sub.status === "trial"    ? "bg-blue-50 text-blue-700 border-blue-200" :
                     "bg-red-50 text-red-700 border-red-200"
                   }
                 >
-                  {sub.status === "trial" ? "Free Trial" : sub.status === "active" ? "Active" : sub.status}
+                  {isEffectivelyExpired ? "Expired" : sub.status === "trial" ? "Free Trial" : sub.status === "active" ? "Active" : sub.status}
                 </Badge>
               </div>
             </div>
@@ -186,7 +195,7 @@ function BillingPage() {
                 <CalendarDays className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    {sub.status === "trial" ? "Trial expires" : "Renews on"}
+                    {isEffectivelyExpired ? "Expired on" : sub.status === "trial" ? "Trial expires" : "Renews on"}
                   </p>
                   <p className="text-sm font-medium">
                     {sub.current_period_end
