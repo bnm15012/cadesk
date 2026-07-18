@@ -229,27 +229,30 @@ function RequestsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="rounded-lg border border-border bg-white">
+        <div className="rounded-lg border border-border bg-white overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12 text-center">#</TableHead>
+                <TableHead className="w-12 text-center hidden sm:table-cell">#</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>FY</TableHead>
-                <TableHead>Progress</TableHead>
+                <TableHead className="hidden sm:table-cell">Client</TableHead>
+                <TableHead className="hidden md:table-cell">FY</TableHead>
+                <TableHead className="hidden md:table-cell">Progress</TableHead>
                 <TableHead>Status</TableHead>
-                {hasPerm(user, "documents.request") && <TableHead className="w-16">Delete</TableHead>}
+                {hasPerm(user, "documents.request") && <TableHead className="w-16 hidden sm:table-cell">Delete</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginated.map((r, idx) => (
                 <TableRow key={r.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate({ to: "/requests/$requestId", params: { requestId: String(r.id) } })}>
-                  <TableCell className="text-center text-sm text-muted-foreground">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
-                  <TableCell className="font-medium">{r.title}</TableCell>
-                  <TableCell>{r.clientName ?? "—"}</TableCell>
-                  <TableCell>{r.fyLabel ?? "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{summary(r.request_items)}</TableCell>
+                  <TableCell className="text-center text-sm text-muted-foreground hidden sm:table-cell">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
+                  <TableCell className="font-medium">
+                    {r.title}
+                    <p className="text-xs text-muted-foreground sm:hidden">{r.clientName ?? "—"} · {r.fyLabel ?? "—"}</p>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">{r.clientName ?? "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell">{r.fyLabel ?? "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground hidden md:table-cell">{summary(r.request_items)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={
                       r.status === "completed" ? "bg-green-100 text-green-700 border-green-200" :
@@ -258,7 +261,7 @@ function RequestsPage() {
                     }>{r.status}</Badge>
                   </TableCell>
                   {hasPerm(user, "documents.request") && (
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       <Button
                         variant="ghost"
                         size="icon"

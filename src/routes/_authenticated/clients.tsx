@@ -228,16 +228,16 @@ function ClientsPage() {
         />
       </div>
 
-      <div className="rounded-lg border border-border bg-white">
+      <div className="rounded-lg border border-border bg-white overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12 text-center">#</TableHead>
+              <TableHead className="w-12 text-center hidden sm:table-cell">#</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>PAN</TableHead>
-              <TableHead>GSTIN</TableHead>
-              <TableHead>Mobile</TableHead>
-              <TableHead>Client Portal</TableHead>
+              <TableHead className="hidden sm:table-cell">PAN</TableHead>
+              <TableHead className="hidden md:table-cell">GSTIN</TableHead>
+              <TableHead className="hidden md:table-cell">Mobile</TableHead>
+              <TableHead>Portal</TableHead>
               {(hasPerm(user, "clients.edit") || hasPerm(user, "clients.delete")) && (
                 <TableHead className="w-20 text-right">Actions</TableHead>
               )}
@@ -263,11 +263,14 @@ function ClientsPage() {
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => navigate({ to: "/clients/$clientId", params: { clientId: String(c.id) } })}
                 >
-                  <TableCell className="text-center text-sm text-muted-foreground">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell>{c.pan ?? "—"}</TableCell>
-                  <TableCell>{c.gstin ?? "—"}</TableCell>
-                  <TableCell>{c.mobile ?? "—"}</TableCell>
+                  <TableCell className="text-center text-sm text-muted-foreground hidden sm:table-cell">{(safePage - 1) * PAGE_SIZE + idx + 1}</TableCell>
+                  <TableCell className="font-medium">
+                    {c.name}
+                    <p className="text-xs text-muted-foreground sm:hidden">{c.pan ?? "—"} · {c.mobile ?? "—"}</p>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">{c.pan ?? "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell">{c.gstin ?? "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell">{c.mobile ?? "—"}</TableCell>
                   <TableCell>
                     {c.portal_user_id ? (
                       <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">Active</Badge>

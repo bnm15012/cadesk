@@ -284,21 +284,25 @@ function ClientDetailPage() {
                       && (!reqStatus || r.status === reqStatus);
                   });
                   return filtered.length ? (
+                    <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Title</TableHead>
-                          <TableHead>FY</TableHead>
-                          <TableHead>Date</TableHead>
+                          <TableHead className="hidden sm:table-cell">FY</TableHead>
+                          <TableHead className="hidden sm:table-cell">Date</TableHead>
                           <TableHead>Status</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filtered.map((r) => (
                           <TableRow key={r.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate({ to: "/requests/$requestId", params: { requestId: String(r.id) } })}>
-                            <TableCell className="font-medium">{r.title}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{r.fyLabel ?? "—"}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{format(new Date(r.created_at), "d MMM yyyy")}</TableCell>
+                            <TableCell className="font-medium">
+                              {r.title}
+                              <p className="text-xs text-muted-foreground sm:hidden">{r.fyLabel ?? "—"} · {format(new Date(r.created_at), "d MMM yyyy")}</p>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">{r.fyLabel ?? "—"}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">{format(new Date(r.created_at), "d MMM yyyy")}</TableCell>
                             <TableCell>
                               <Badge variant="outline" className={
                                 r.status === "completed" ? "bg-green-100 text-green-700 border-green-200" :
@@ -310,6 +314,7 @@ function ClientDetailPage() {
                         ))}
                       </TableBody>
                     </Table>
+                    </div>
                   ) : (
                     <p className="py-4 text-sm text-muted-foreground text-center">No matching requests.</p>
                   );
