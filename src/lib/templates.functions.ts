@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
 import { document_templates, template_items } from "@/lib/db/schema";
-import { getUserTenant } from "@/lib/db/helpers";
+import { getUserTenant, checkPlanLimit } from "@/lib/db/helpers";
 
 export const getTemplates = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -49,6 +49,8 @@ export const createTemplate = createServerFn({ method: "POST" })
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
     if (!tenantId) throw new Error("No firm found for your account");
+
+    await checkPlanLimit(tenantId, "templates");
 
     const db = getDb();
     const now = new Date();

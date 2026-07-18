@@ -5,7 +5,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
 import { clients } from "@/lib/db/schema";
 import { logActivity } from "@/lib/activity";
-import { getUserTenant } from "@/lib/db/helpers";
+import { getUserTenant, checkPlanLimit } from "@/lib/db/helpers";
 
 export const getClients = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -43,6 +43,8 @@ export const addClient = createServerFn({ method: "POST" })
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
     if (!tenantId) throw new Error("No firm found for your account");
+
+    await checkPlanLimit(tenantId, "clients");
 
     const db = getDb();
     const now = new Date();

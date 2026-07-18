@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { getDb } from "@/lib/db";
 import { clients, profiles, user_roles, users } from "@/lib/db/schema";
 import { logActivity } from "@/lib/activity";
-import { getUserTenant, hasPermission } from "@/lib/db/helpers";
+import { getUserTenant, hasPermission, checkPlanLimit } from "@/lib/db/helpers";
 
 const BCRYPT_ROUNDS = 10;
 
@@ -29,6 +29,8 @@ export const inviteTeamMember = createServerFn({ method: "POST" })
 
     const tenantId = await getUserTenant(userId);
     if (!tenantId) throw new Error("No firm found for your account");
+
+    await checkPlanLimit(tenantId, "staff");
 
     const db = getDb();
     const email = data.email.toLowerCase().trim();
