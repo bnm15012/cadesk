@@ -333,7 +333,7 @@ function BillingPage() {
                   <Button className="w-full" variant="outline" disabled>
                     Not available
                   </Button>
-                  <p className="mt-2 text-xs text-red-600 text-center">
+                  <p className="mt-2 text-xs text-red-700 font-bold text-center">
                     Cannot select — {reasons.join(", ")}.
                   </p>
                 </div>
