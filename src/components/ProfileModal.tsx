@@ -75,33 +75,33 @@ export function ProfileModal({
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-semibold">
                 {(user?.fullName || user?.email || "?")[0].toUpperCase()}
               </span>
-              <div>
-                <p className="font-semibold">{user?.fullName || "—"}</p>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{user?.fullName || "—"}</p>
+                <p className="text-sm text-muted-foreground break-all">{user?.email}</p>
               </div>
             </div>
 
             <div className="divide-y divide-border rounded-lg border border-border">
               <div className="flex items-center gap-3 px-4 py-2.5">
                 <User className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground w-20">Full name</span>
-                <span className="text-sm font-medium">{user?.fullName || "—"}</span>
+                <span className="text-sm text-muted-foreground shrink-0 w-20">Full name</span>
+                <span className="text-sm font-medium min-w-0 break-words">{user?.fullName || "—"}</span>
               </div>
               <div className="flex items-center gap-3 px-4 py-2.5">
                 <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground w-20">Email</span>
-                <span className="text-sm font-medium">{user?.email || "—"}</span>
+                <span className="text-sm text-muted-foreground shrink-0 w-20">Email</span>
+                <span className="text-sm font-medium min-w-0 break-all">{user?.email || "—"}</span>
               </div>
               <div className="flex items-center gap-3 px-4 py-2.5">
                 <ShieldCheck className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground w-20">Role</span>
+                <span className="text-sm text-muted-foreground shrink-0 w-20">Role</span>
                 <Badge variant="secondary">{roleLabel}</Badge>
               </div>
               {user?.tenantName && (
                 <div className="flex items-center gap-3 px-4 py-2.5">
                   <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground w-20">Firm</span>
-                  <span className="text-sm font-medium">{user.tenantName}</span>
+                  <span className="text-sm text-muted-foreground shrink-0 w-20">Firm</span>
+                  <span className="text-sm font-medium min-w-0 break-words">{user.tenantName}</span>
                 </div>
               )}
             </div>
