@@ -146,6 +146,7 @@ export async function checkPlanLimit(
   const isExpired =
     sub.status === "expired" ||
     sub.status === "cancelled" ||
+    sub.status === "past_due" ||
     (sub.current_period_end !== null && new Date(sub.current_period_end) < new Date());
 
   if (isExpired) {

@@ -245,11 +245,11 @@ function BillingPage() {
           // Check if current usage exceeds this plan's limits
           const reasons: string[] = [];
           if (usage) {
-            if (p.max_clients > 0 && usage.clients > p.max_clients)
+            if (p.max_clients > 0 && usage.clients >= p.max_clients)
               reasons.push(`you have ${usage.clients} clients (limit: ${p.max_clients})`);
-            if (p.max_staff > 0 && usage.staff > p.max_staff)
+            if (p.max_staff > 0 && usage.staff >= p.max_staff)
               reasons.push(`you have ${usage.staff} team members (limit: ${p.max_staff})`);
-            if (p.max_templates > 0 && usage.templates > p.max_templates)
+            if (p.max_templates > 0 && usage.templates >= p.max_templates)
               reasons.push(`you have ${usage.templates} templates (limit: ${p.max_templates})`);
           }
           const incompatible = reasons.length > 0;

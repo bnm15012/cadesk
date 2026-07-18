@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import {
   LayoutDashboard,
@@ -20,6 +20,7 @@ import {
   ChevronDown,
   UserCircle,
   KeyRound,
+  AlertTriangle,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { signOut } from "@/lib/auth";
@@ -27,6 +28,7 @@ import { useCurrentUser, hasPerm } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ProfileModal } from "@/components/ProfileModal";
+import { getCurrentSubscription } from "@/lib/billing.functions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +54,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [profileOpen, setProfileOpen] = useState<"profile" | "password" | false>(false);
 
   const performSignOut = useServerFn(signOut);
+  const fetchSub = useServerFn(getCurrentSubscription);
+
+  const { data: sub } = useQuery({
+    queryKey: ["subscription", user?.tenantId],
+    enabled: !!user?.isFirmMember,
+    queryFn: () => fetchSub(),
+    staleTime: 5 * 60 * 1000, // recheck every 5 min at most
+  });
+
+  const isExpired =
+    !!sub &&
+    (sub.status === "expired" ||
+      sub.status === "cancelled" ||
+      sub.status === "past_due" ||
+      (sub.current_period_end !== null &&
+        new Date(sub.current_period_end) < new Date()));
 
   const handleSignOut = async () => {
     await queryClient.cancelQueries();
@@ -277,6 +295,31 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
 
       <main className="flex-1 pb-20 pt-14 lg:ml-64 lg:pb-0 lg:pt-14 bg-slate-50 min-h-screen">
+        {isExpired && (
+          <div className="bg-red-600 text-white px-4 py-2.5 flex items-center justify-center gap-3 text-sm">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>
+              Your plan has expired
+              {sub?.current_period_end
+                ? ` on ${new Date(sub.current_period_end).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
+                : ""}
+              . You can view existing records but cannot add new ones.
+            </span>
+            {user?.isCaAdmin && (
+              <Link
+                to="/billing"
+                className="ml-2 underline underline-offset-2 font-semibold whitespace-nowrap hover:text-red-100"
+              >
+                Renew now →
+              </Link>
+            )}
+            {!user?.isCaAdmin && (
+              <span className="ml-2 font-semibold whitespace-nowrap">
+                Contact your CA Admin to renew.
+              </span>
+            )}
+          </div>
+        )}
         <div className="mx-auto max-w-6xl px-4 py-8 lg:px-8">{children}</div>
       </main>
     </div>
