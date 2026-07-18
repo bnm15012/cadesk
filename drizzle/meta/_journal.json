@@ -15,6 +15,13 @@
       "when": 1783804725127,
       "tag": "0001_thin_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1784334925768,
+      "tag": "0002_gorgeous_korvac",
+      "breakpoints": true
     }
   ]
 }

@@ -289,6 +289,12 @@ export const coupons = mysqlTable("coupons", {
   created_at: datetime("created_at").notNull().default(new Date("1970-01-01")),
 });
 
+export const system_settings = mysqlTable("system_settings", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: text("value").notNull(),
+  updated_at: datetime("updated_at").notNull().default(new Date("1970-01-01")),
+});
+
 // ─── Inferred Types ───────────────────────────────────────────────────────────
 
 export type User = typeof users.$inferSelect;
