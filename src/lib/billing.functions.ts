@@ -179,7 +179,7 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
       .select({ id: subscriptions.id })
       .from(subscriptions)
       .where(eq(subscriptions.tenant_id, tenantId))
-      .orderBy(desc(subscriptions.created_at))
+      .orderBy(desc(subscriptions.id))
       .limit(1);
     const existingSub = existingSubRows[0];
 
@@ -194,6 +194,7 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
           billing_period: data.billingPeriod,
           current_period_start: periodStart,
           current_period_end: periodEnd,
+          updated_at: new Date(),
         })
         .where(eq(subscriptions.id, existingSub.id));
     } else {

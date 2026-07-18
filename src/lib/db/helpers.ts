@@ -113,6 +113,34 @@ export async function canAccessRequest(
 }
 
 /**
+ * Throws if the tenant's plan is expired/cancelled/past_due or period has passed.
+ * Use this for actions that are blocked on expiry but have no quota (e.g. creating requests).
+ */
+export async function checkPlanExpiry(tenantId: number): Promise<void> {
+  const db = getDb();
+  const [sub] = await db
+    .select({ status: subscriptions.status, current_period_end: subscriptions.current_period_end })
+    .from(subscriptions)
+    .where(eq(subscriptions.tenant_id, tenantId))
+    .orderBy(desc(subscriptions.id))
+    .limit(1);
+
+  if (!sub) return; // no subscription → allow (seeding)
+
+  const isExpired =
+    sub.status === "expired" ||
+    sub.status === "cancelled" ||
+    sub.status === "past_due" ||
+    (sub.current_period_end !== null && new Date(sub.current_period_end) < new Date());
+
+  if (isExpired) {
+    throw new Error(
+      "Your plan has expired. Please renew from the Billing page to continue."
+    );
+  }
+}
+
+/**
  * Checks whether a tenant has headroom under their plan limit for the given resource.
  * Throws a user-friendly error if the limit is reached.
  * limit=0 means unlimited.

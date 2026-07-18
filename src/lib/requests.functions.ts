@@ -12,7 +12,7 @@ import {
   request_items,
   template_items,
 } from "@/lib/db/schema";
-import { getUserTenant } from "@/lib/db/helpers";
+import { getUserTenant, checkPlanExpiry } from "@/lib/db/helpers";
 
 export const getRequests = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -183,6 +183,8 @@ export const createRequest = createServerFn({ method: "POST" })
     const { userId } = context;
     const tenantId = await getUserTenant(userId);
     if (!tenantId) throw new Error("No firm found for your account");
+
+    await checkPlanExpiry(tenantId);
 
     const db = getDb();
     const now = new Date();
