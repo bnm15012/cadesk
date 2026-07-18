@@ -2,9 +2,9 @@ import { asc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { activity_logs } from "@/lib/db/schema";
 
-const MAX_ACTIVITY_LOGS = 200;
+const MAX_ACTIVITY_LOGS = 400;
 
-/** Fire-and-forget activity logging. Never throws. Keeps last 200 per firm. */
+/** Fire-and-forget activity logging. Never throws. Keeps last 400 per firm. */
 export async function logActivity(params: {
   tenantId: number | string;
   userId: string;
