@@ -54,21 +54,29 @@ function BillingPage() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
   const [payingPlanId, setPayingPlanId] = useState<number | null>(null);
 
+  const DAY = 24 * 60 * 60 * 1000;
+
   const { data: plans } = useQuery({
     queryKey: ["plans"],
     queryFn: () => fetchPlans(),
+    staleTime: DAY,
+    gcTime: DAY,
   });
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.tenantId],
     enabled: !!user,
     queryFn: () => fetchSub(),
+    staleTime: DAY,
+    gcTime: DAY,
   });
 
   const { data: usage } = useQuery({
     queryKey: ["usage", user?.tenantId],
     enabled: !!user,
     queryFn: () => fetchUsage(),
+    staleTime: DAY,
+    gcTime: DAY,
   });
 
   const trialDaysLeft = sub?.current_period_end

@@ -60,7 +60,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryKey: ["subscription", user?.tenantId],
     enabled: !!user?.isFirmMember,
     queryFn: () => fetchSub(),
-    staleTime: 5 * 60 * 1000, // recheck every 5 min at most
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
   });
 
   const isExpired =
