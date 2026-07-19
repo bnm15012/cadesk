@@ -30,7 +30,7 @@ function DashboardPage() {
     queryKey: ["dashboard-stats", user?.tenantId],
     enabled: !!user?.tenantId && user.isFirmMember,
     queryFn: () => fetchStats(),
-    staleTime: 5 * 60 * 1000, // 5 min — live counts change as clients upload
+    staleTime: 60 * 1000, // 1 min — live counts change as clients upload
   });
 
   const sub = stats?.subscription;
